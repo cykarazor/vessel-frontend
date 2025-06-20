@@ -14,7 +14,6 @@ export default function App() {
     remarks: "",
   });
 
-  // Fetch voyages from backend
   useEffect(() => {
     fetchVoyages();
   }, []);
@@ -28,7 +27,6 @@ export default function App() {
     }
   }
 
-  // Handle form input changes
   function handleChange(e) {
     const { name, value } = e.target;
 
@@ -42,7 +40,6 @@ export default function App() {
     }
   }
 
-  // Submit new voyage
   async function handleSubmit(e) {
     e.preventDefault();
     try {
@@ -57,7 +54,7 @@ export default function App() {
         cargo: { type: "", quantityUnit: "MT", total: "", rateUSD: "" },
         remarks: "",
       });
-      fetchVoyages(); // Refresh the list
+      fetchVoyages();
     } catch (error) {
       console.error("Error adding voyage:", error);
     }
@@ -158,14 +155,42 @@ export default function App() {
       </form>
 
       <h3 style={{ marginTop: 30 }}>Voyages</h3>
-      <ul>
-        {voyages.map((v) => (
-          <li key={v._id}>
-            <strong>{v.vesselName}</strong> — Voyage #{v.voyageNumber} from{" "}
-            {v.departurePort} to {v.arrivalPort} — Cargo: {v.cargo.type} ({v.cargo.total} {v.cargo.quantityUnit}) — Rate: ${v.cargo.rateUSD} — Remarks: {v.remarks}
-          </li>
-        ))}
-      </ul>
+      {voyages.length === 0 ? (
+        <p>No voyages yet.</p>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {voyages.map((v) => (
+            <div
+              key={v._id}
+              style={{
+                border: "1px solid #ccc",
+                borderRadius: 8,
+                padding: 12,
+                background: "#f9f9f9",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+              }}
+            >
+              <h4 style={{ margin: "0 0 8px 0" }}>
+                {v.vesselName} – Voyage #{v.voyageNumber}
+              </h4>
+              <p style={{ margin: "4px 0" }}>
+                <strong>From:</strong> {v.departurePort} on {v.departureDate}
+              </p>
+              <p style={{ margin: "4px 0" }}>
+                <strong>To:</strong> {v.arrivalPort} on {v.arrivalDate}
+              </p>
+              <p style={{ margin: "4px 0" }}>
+                <strong>Cargo:</strong> {v.cargo.type} – {v.cargo.total} {v.cargo.quantityUnit} @ ${v.cargo.rateUSD}
+              </p>
+              {v.remarks && (
+                <p style={{ margin: "4px 0" }}>
+                  <strong>Remarks:</strong> {v.remarks}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
