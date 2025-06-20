@@ -14,6 +14,7 @@ export default function App() {
     remarks: "",
   });
 
+  // Fetch voyages from backend
   useEffect(() => {
     fetchVoyages();
   }, []);
@@ -21,12 +22,14 @@ export default function App() {
   async function fetchVoyages() {
     try {
       const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/voyages`);
+      console.log("Voyages from backend:", res.data);
       setVoyages(res.data);
     } catch (error) {
       console.error("Error fetching voyages:", error);
     }
   }
 
+  // Handle form input changes
   function handleChange(e) {
     const { name, value } = e.target;
 
@@ -40,6 +43,7 @@ export default function App() {
     }
   }
 
+  // Submit new voyage
   async function handleSubmit(e) {
     e.preventDefault();
     try {
@@ -54,7 +58,7 @@ export default function App() {
         cargo: { type: "", quantityUnit: "MT", total: "", rateUSD: "" },
         remarks: "",
       });
-      fetchVoyages();
+      fetchVoyages(); // Refresh the list
     } catch (error) {
       console.error("Error adding voyage:", error);
     }
@@ -155,13 +159,14 @@ export default function App() {
       </form>
 
       <h3 style={{ marginTop: 30 }}>Voyages</h3>
+
       {voyages.length === 0 ? (
         <p>No voyages yet.</p>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {voyages.map((v) => (
             <div
-              key={v._id}
+              key={v._id || `${v.vesselName}-${v.voyageNumber}`}
               style={{
                 border: "1px solid #ccc",
                 borderRadius: 8,
@@ -171,16 +176,16 @@ export default function App() {
               }}
             >
               <h4 style={{ margin: "0 0 8px 0" }}>
-                {v.vesselName} – Voyage #{v.voyageNumber}
+                {v.vesselName || "N/A"} – Voyage #{v.voyageNumber || "N/A"}
               </h4>
               <p style={{ margin: "4px 0" }}>
-                <strong>From:</strong> {v.departurePort} on {v.departureDate}
+                <strong>From:</strong> {v.departurePort || "N/A"} on {v.departureDate || "N/A"}
               </p>
               <p style={{ margin: "4px 0" }}>
-                <strong>To:</strong> {v.arrivalPort} on {v.arrivalDate}
+                <strong>To:</strong> {v.arrivalPort || "N/A"} on {v.arrivalDate || "N/A"}
               </p>
               <p style={{ margin: "4px 0" }}>
-                <strong>Cargo:</strong> {v.cargo.type} – {v.cargo.total} {v.cargo.quantityUnit} @ ${v.cargo.rateUSD}
+                <strong>Cargo:</strong> {v.cargo?.type || "N/A"} – {v.cargo?.total || "N/A"} {v.cargo?.quantityUnit || "N/A"} @ ${v.cargo?.rateUSD || "N/A"}
               </p>
               {v.remarks && (
                 <p style={{ margin: "4px 0" }}>
