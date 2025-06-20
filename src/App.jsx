@@ -14,7 +14,6 @@ export default function App() {
     remarks: "",
   });
 
-  // Fetch voyages from backend
   useEffect(() => {
     fetchVoyages();
   }, []);
@@ -29,10 +28,8 @@ export default function App() {
     }
   }
 
-  // Handle form input changes
   function handleChange(e) {
     const { name, value } = e.target;
-
     if (name.startsWith("cargo.")) {
       setForm((prev) => ({
         ...prev,
@@ -43,7 +40,6 @@ export default function App() {
     }
   }
 
-  // Submit new voyage
   async function handleSubmit(e) {
     e.preventDefault();
     try {
@@ -58,7 +54,7 @@ export default function App() {
         cargo: { type: "", quantityUnit: "MT", total: "", rateUSD: "" },
         remarks: "",
       });
-      fetchVoyages(); // Refresh the list
+      fetchVoyages();
     } catch (error) {
       console.error("Error adding voyage:", error);
     }
@@ -172,6 +168,7 @@ export default function App() {
                 borderRadius: 8,
                 padding: 12,
                 background: "#f9f9f9",
+                color: "#333",
                 boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
               }}
             >
