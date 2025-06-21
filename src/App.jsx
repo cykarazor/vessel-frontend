@@ -9,9 +9,13 @@ export default function App() {
     voyageNumber: "",
     departureDate: "",
     departurePort: "",
+    departureCountry: "",   // NEW
     arrivalDate: "",
     arrivalPort: "",
+    arrivalCountry: "",     // NEW
     cargo: { type: "", quantityUnit: "MT", total: "", rateUSD: "" },
+    agent: "",              // NEW
+    consignee: "",          // NEW
     remarks: "",
   });
 
@@ -49,9 +53,13 @@ export default function App() {
         voyageNumber: "",
         departureDate: "",
         departurePort: "",
+        departureCountry: "",   // NEW
         arrivalDate: "",
         arrivalPort: "",
+        arrivalCountry: "",     // NEW
         cargo: { type: "", quantityUnit: "MT", total: "", rateUSD: "" },
+        agent: "",              // NEW
+        consignee: "",          // NEW
         remarks: "",
       });
       fetchVoyages();
@@ -97,6 +105,13 @@ export default function App() {
           required
         />
         <input
+          name="departureCountry"
+          placeholder="Departure Country"
+          value={form.departureCountry}
+          onChange={handleChange}
+          required
+        />
+        <input
           type="date"
           name="arrivalDate"
           value={form.arrivalDate}
@@ -107,6 +122,13 @@ export default function App() {
           name="arrivalPort"
           placeholder="Arrival Port"
           value={form.arrivalPort}
+          onChange={handleChange}
+          required
+        />
+        <input
+          name="arrivalCountry"
+          placeholder="Arrival Country"
+          value={form.arrivalCountry}
           onChange={handleChange}
           required
         />
@@ -143,6 +165,20 @@ export default function App() {
           min="0"
           step="any"
           value={form.cargo.rateUSD}
+          onChange={handleChange}
+          required
+        />
+        <input
+          name="agent"
+          placeholder="Agent"
+          value={form.agent}
+          onChange={handleChange}
+          required
+        />
+        <input
+          name="consignee"
+          placeholder="Consignee"
+          value={form.consignee}
           onChange={handleChange}
           required
         />
@@ -189,7 +225,6 @@ export default function App() {
                 right: 0,
                 bottom: 0,
                 background: "rgba(0,0,0,0.4)",
-                color: "#222", // <-- Add this line!
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -200,6 +235,7 @@ export default function App() {
               <div
                 style={{
                   background: "#fff",
+                  color: "#222",
                   borderRadius: 8,
                   padding: 24,
                   minWidth: 320,
@@ -227,17 +263,19 @@ export default function App() {
                   {selectedVoyage.vesselName} – Voyage #{selectedVoyage.voyageNumber}
                 </h3>
                 <p>
-                  <strong>From:</strong> {selectedVoyage.departurePort} on{" "}
-                  {selectedVoyage.departureDate}
+                  <strong>From:</strong> {selectedVoyage.departurePort} ({selectedVoyage.departureCountry}) on {selectedVoyage.departureDate}
                 </p>
                 <p>
-                  <strong>To:</strong> {selectedVoyage.arrivalPort} on{" "}
-                  {selectedVoyage.arrivalDate}
+                  <strong>To:</strong> {selectedVoyage.arrivalPort} ({selectedVoyage.arrivalCountry}) on {selectedVoyage.arrivalDate}
                 </p>
                 <p>
-                  <strong>Cargo:</strong> {selectedVoyage.cargo?.type} –{" "}
-                  {selectedVoyage.cargo?.total} {selectedVoyage.cargo?.quantityUnit} @ $
-                  {selectedVoyage.cargo?.rateUSD}
+                  <strong>Cargo:</strong> {selectedVoyage.cargo?.type} – {selectedVoyage.cargo?.total} {selectedVoyage.cargo?.quantityUnit} @ ${selectedVoyage.cargo?.rateUSD}
+                </p>
+                <p>
+                  <strong>Agent:</strong> {selectedVoyage.agent}
+                </p>
+                <p>
+                  <strong>Consignee:</strong> {selectedVoyage.consignee}
                 </p>
                 {selectedVoyage.remarks && (
                   <p>
