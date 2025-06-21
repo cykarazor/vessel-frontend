@@ -3,6 +3,7 @@ import axios from "axios";
 
 export default function App() {
   const [voyages, setVoyages] = useState([]);
+  const [selectedVoyage, setSelectedVoyage] = useState(null);
   const [form, setForm] = useState({
     vesselName: "",
     voyageNumber: "",
@@ -21,7 +22,6 @@ export default function App() {
   async function fetchVoyages() {
     try {
       const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/voyages`);
-      console.log("Voyages from backend:", res.data);
       setVoyages(res.data);
     } catch (error) {
       console.error("Error fetching voyages:", error);
@@ -64,7 +64,10 @@ export default function App() {
     <div style={{ padding: 20, maxWidth: 600, margin: "auto" }}>
       <h2>Vessel Voyage Tracker</h2>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: "flex", flexDirection: "column", gap: 8 }}
+      >
         <input
           name="vesselName"
           placeholder="Vessel Name"
@@ -159,39 +162,91 @@ export default function App() {
       {voyages.length === 0 ? (
         <p>No voyages yet.</p>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {voyages.map((v) => (
+        <>
+          <ul style={{ padding: 0, listStyle: "none" }}>
+            {voyages.map((v) => (
+              <li
+                key={v._id || `${v.vesselName}-${v.voyageNumber}`}
+                onClick={() => setSelectedVoyage(v)}
+                style={{
+                  cursor: "pointer",
+                  padding: "10px 0",
+                  borderBottom: "1px solid #eee",
+                }}
+              >
+                <strong>{v.voyageNumber || "N/A"}</strong> — {v.vesselName || "N/A"}
+              </li>
+            ))}
+          </ul>
+
+          {/* Modal */}
+          {selectedVoyage && (
             <div
-              key={v._id || `${v.vesselName}-${v.voyageNumber}`}
               style={{
-                border: "1px solid #ccc",
-                borderRadius: 8,
-                padding: 12,
-                background: "#f9f9f9",
-                color: "#333",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+                position: "fixed",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: "rgba(0,0,0,0.4)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1000,
               }}
+              onClick={() => setSelectedVoyage(null)}
             >
-              <h4 style={{ margin: "0 0 8px 0" }}>
-                {v.vesselName || "N/A"} – Voyage #{v.voyageNumber || "N/A"}
-              </h4>
-              <p style={{ margin: "4px 0" }}>
-                <strong>From:</strong> {v.departurePort || "N/A"} on {v.departureDate || "N/A"}
-              </p>
-              <p style={{ margin: "4px 0" }}>
-                <strong>To:</strong> {v.arrivalPort || "N/A"} on {v.arrivalDate || "N/A"}
-              </p>
-              <p style={{ margin: "4px 0" }}>
-                <strong>Cargo:</strong> {v.cargo?.type || "N/A"} – {v.cargo?.total || "N/A"} {v.cargo?.quantityUnit || "N/A"} @ ${v.cargo?.rateUSD || "N/A"}
-              </p>
-              {v.remarks && (
-                <p style={{ margin: "4px 0" }}>
-                  <strong>Remarks:</strong> {v.remarks}
+              <div
+                style={{
+                  background: "#fff",
+                  borderRadius: 8,
+                  padding: 24,
+                  minWidth: 320,
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+                  position: "relative",
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setSelectedVoyage(null)}
+                  style={{
+                    position: "absolute",
+                    top: 12,
+                    right: 12,
+                    border: "none",
+                    background: "transparent",
+                    fontSize: 20,
+                    cursor: "pointer",
+                  }}
+                  aria-label="Close"
+                >
+                  &times;
+                </button>
+                <h3>
+                  {selectedVoyage.vesselName} – Voyage #{selectedVoyage.voyageNumber}
+                </h3>
+                <p>
+                  <strong>From:</strong> {selectedVoyage.departurePort} on{" "}
+                  {selectedVoyage.departureDate}
                 </p>
-              )}
+                <p>
+                  <strong>To:</strong> {selectedVoyage.arrivalPort} on{" "}
+                  {selectedVoyage.arrivalDate}
+                </p>
+                <p>
+                  <strong>Cargo:</strong> {selectedVoyage.cargo?.type} –{" "}
+                  {selectedVoyage.cargo?.total} {selectedVoyage.cargo?.quantityUnit} @ $
+                  {selectedVoyage.cargo?.rateUSD}
+                </p>
+                {selectedVoyage.remarks && (
+                  <p>
+                    <strong>Remarks:</strong> {selectedVoyage.remarks}
+                  </p>
+                )}
+              </div>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
     </div>
   );
