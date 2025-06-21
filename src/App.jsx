@@ -140,6 +140,7 @@ function App() {
       margin: "2rem auto",
       fontFamily: "sans-serif",
       background: "#f5f6fa", // very light gray
+      color: "#222",
       minHeight: "100vh",
       padding: "2rem",
       borderRadius: 10
