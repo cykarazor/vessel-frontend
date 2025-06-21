@@ -200,113 +200,118 @@ function App() {
       <Modal open={!!selectedVoyage} onClose={closeModal}>
         {editMode ? (
           <form onSubmit={handleSubmit}>
-      <h2 style={{ color: "#273c75" }}>{selectedVoyage && selectedVoyage._id ? "Edit Voyage" : "Add Voyage"}</h2>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
-        <div>
-          <label>Vessel Name<br />
-            <input name="vesselName" value={form.vesselName} onChange={handleChange} required />
-          </label>
-        </div>
-        <div>
-          <label>Voyage Number<br />
-            <input name="voyageNumber" value={form.voyageNumber} onChange={handleChange} required />
-          </label>
-        </div>
-        <div>
-          <label>Departure Date<br />
-            <input type="date" name="departureDate" value={form.departureDate} onChange={handleChange} required />
-          </label>
-        </div>
-        <div>
-          <label>Departure Port<br />
-            <input name="departurePort" value={form.departurePort} onChange={handleChange} required />
-          </label>
-        </div>
-        <div>
-          <label>Departure Country<br />
-            <input name="departureCountry" value={form.departureCountry} onChange={handleChange} />
-          </label>
-        </div>
-        <div>
-          <label>Arrival Date<br />
-            <input type="date" name="arrivalDate" value={form.arrivalDate} onChange={handleChange} required />
-          </label>
-        </div>
-        <div>
-          <label>Arrival Port<br />
-            <input name="arrivalPort" value={form.arrivalPort} onChange={handleChange} required />
-          </label>
-        </div>
-        <div>
-          <label>Arrival Country<br />
-            <input name="arrivalCountry" value={form.arrivalCountry} onChange={handleChange} />
-          </label>
-        </div>
-        <div>
-          <label>Cargo Type<br />
-            <input name="cargo.type" value={form.cargo.type} onChange={handleChange} />
-          </label>
-        </div>
-        <div>
-          <label>Quantity Unit<br />
-            <select name="cargo.quantityUnit" value={form.cargo.quantityUnit} onChange={handleChange}>
-              <option value="MT">MT</option>
-              <option value="KG">KG</option>
-            </select>
-          </label>
-        </div>
-        <div>
-          <label>Total<br />
-            <input type="number" name="cargo.total" value={form.cargo.total} onChange={handleChange} />
-          </label>
-        </div>
-        <div>
-          <label>Rate USD<br />
-            <input type="number" name="cargo.rateUSD" value={form.cargo.rateUSD} onChange={handleChange} />
-          </label>
-        </div>
-        <div>
-          <label>Agent<br />
-            <input name="agent" value={form.agent} onChange={handleChange} />
-          </label>
-        </div>
-        <div>
-          <label>Consignee<br />
-            <input name="consignee" value={form.consignee} onChange={handleChange} />
-          </label>
-        </div>
-        <div style={{ flex: 1 }}>
-          <label>Remarks<br />
-            <input name="remarks" value={form.remarks} onChange={handleChange} />
-          </label>
-        </div>
-      </div>
-      <div style={{ marginTop: 16 }}>
-        <button style={{ background: "#273c75", color: "#fff", padding: "8px 16px", border: "none", borderRadius: 4, cursor: "pointer" }} type="submit">
-          {selectedVoyage && selectedVoyage._id ? "Update" : "Add"}
-        </button>
-        <button type="button" onClick={closeModal} style={{ marginLeft: 8, background: "#eee", color: "#222", padding: "8px 16px", border: "none", borderRadius: 4, cursor: "pointer" }}>Cancel</button>
-      </div>
-    </form>
-  ) : selectedVoyage ? (
-    <div>
-      <h2 style={{ color: "#273c75" }}>Voyage Details</h2>
-      <p><strong>Vessel Name:</strong> {selectedVoyage.vesselName}</p>
-      <p><strong>Voyage Number:</strong> {selectedVoyage.voyageNumber}</p>
-      <p><strong>Departure Date:</strong> {selectedVoyage.departureDate ? new Date(selectedVoyage.departureDate).toLocaleDateString() : ""}</p>
-      <p><strong>Departure Port:</strong> {selectedVoyage.departurePort}</p>
-      <p><strong>Departure Country:</strong> {selectedVoyage.departureCountry}</p>
-      <p><strong>Arrival Date:</strong> {selectedVoyage.arrivalDate ? new Date(selectedVoyage.arrivalDate).toLocaleDateString() : ""}</p>
-      <p><strong>Arrival Port:</strong> {selectedVoyage.arrivalPort}</p>
-      <p><strong>Arrival Country:</strong> {selectedVoyage.arrivalCountry}</p>
-      <p><strong>Cargo Type:</strong> {selectedVoyage.cargo?.type}</p>
-      <p><strong>Quantity Unit:</strong> {selectedVoyage.cargo?.quantityUnit}</p>
-      <p><strong>Total:</strong> {selectedVoyage.cargo?.total}</p>
-      <p><strong>Rate USD:</strong> {selectedVoyage.cargo?.rateUSD}</p>
-      <p><strong>Agent:</strong> {selectedVoyage.agent}</p>
-      <p><strong>Consignee:</strong> {selectedVoyage.consignee}</p>
-      <p><strong>Remarks:</strong> {selectedVoyage.remarks}</p>
-      <button style={{ background: "#273c75", color: "#fff", padding: "8px 16px", border: "none", borderRadius: 4, cursor: "pointer" }} onClick={() => setEditMode(true)}>Edit</button>
+            <h2 style={{ color: "#273c75" }}>{selectedVoyage && selectedVoyage._id ? "Edit Voyage" : "Add Voyage"}</h2>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
+              <div>
+                <label>Vessel Name<br />
+                  <input name="vesselName" value={form.vesselName} onChange={handleChange} required />
+                </label>
+              </div>
+              <div>
+                <label>Voyage Number<br />
+                  <input name="voyageNumber" value={form.voyageNumber} onChange={handleChange} required />
+                </label>
+              </div>
+              <div>
+                <label>Departure Date<br />
+                  <input type="date" name="departureDate" value={form.departureDate} onChange={handleChange} required />
+                </label>
+              </div>
+              <div>
+                <label>Departure Port<br />
+                  <input name="departurePort" value={form.departurePort} onChange={handleChange} required />
+                </label>
+              </div>
+              <div>
+                <label>Departure Country<br />
+                  <input name="departureCountry" value={form.departureCountry} onChange={handleChange} />
+                </label>
+              </div>
+              <div>
+                <label>Arrival Date<br />
+                  <input type="date" name="arrivalDate" value={form.arrivalDate} onChange={handleChange} required />
+                </label>
+              </div>
+              <div>
+                <label>Arrival Port<br />
+                  <input name="arrivalPort" value={form.arrivalPort} onChange={handleChange} required />
+                </label>
+              </div>
+              <div>
+                <label>Arrival Country<br />
+                  <input name="arrivalCountry" value={form.arrivalCountry} onChange={handleChange} />
+                </label>
+              </div>
+              <div>
+                <label>Cargo Type<br />
+                  <input name="cargo.type" value={form.cargo.type} onChange={handleChange} />
+                </label>
+              </div>
+              <div>
+                <label>Quantity Unit<br />
+                  <select name="cargo.quantityUnit" value={form.cargo.quantityUnit} onChange={handleChange}>
+                    <option value="MT">MT</option>
+                    <option value="KG">KG</option>
+                  </select>
+                </label>
+              </div>
+              <div>
+                <label>Total<br />
+                  <input type="number" name="cargo.total" value={form.cargo.total} onChange={handleChange} />
+                </label>
+              </div>
+              <div>
+                <label>Rate USD<br />
+                  <input type="number" name="cargo.rateUSD" value={form.cargo.rateUSD} onChange={handleChange} />
+                </label>
+              </div>
+              <div>
+                <label>Agent<br />
+                  <input name="agent" value={form.agent} onChange={handleChange} />
+                </label>
+              </div>
+              <div>
+                <label>Consignee<br />
+                  <input name="consignee" value={form.consignee} onChange={handleChange} />
+                </label>
+              </div>
+              <div style={{ flex: 1 }}>
+                <label>Remarks<br />
+                  <input name="remarks" value={form.remarks} onChange={handleChange} />
+                </label>
+              </div>
+            </div>
+            <div style={{ marginTop: 16 }}>
+              <button style={{ background: "#273c75", color: "#fff", padding: "8px 16px", border: "none", borderRadius: 4, cursor: "pointer" }} type="submit">
+                {selectedVoyage && selectedVoyage._id ? "Update" : "Add"}
+              </button>
+              <button type="button" onClick={closeModal} style={{ marginLeft: 8, background: "#eee", color: "#222", padding: "8px 16px", border: "none", borderRadius: 4, cursor: "pointer" }}>Cancel</button>
+            </div>
+          </form>
+        ) : selectedVoyage ? (
+          <div>
+            <h2 style={{ color: "#273c75" }}>Voyage Details</h2>
+            <p><strong>Vessel Name:</strong> {selectedVoyage.vesselName}</p>
+            <p><strong>Voyage Number:</strong> {selectedVoyage.voyageNumber}</p>
+            <p><strong>Departure Date:</strong> {selectedVoyage.departureDate ? new Date(selectedVoyage.departureDate).toLocaleDateString() : ""}</p>
+            <p><strong>Departure Port:</strong> {selectedVoyage.departurePort}</p>
+            <p><strong>Departure Country:</strong> {selectedVoyage.departureCountry}</p>
+            <p><strong>Arrival Date:</strong> {selectedVoyage.arrivalDate ? new Date(selectedVoyage.arrivalDate).toLocaleDateString() : ""}</p>
+            <p><strong>Arrival Port:</strong> {selectedVoyage.arrivalPort}</p>
+            <p><strong>Arrival Country:</strong> {selectedVoyage.arrivalCountry}</p>
+            <p><strong>Cargo Type:</strong> {selectedVoyage.cargo?.type}</p>
+            <p><strong>Quantity Unit:</strong> {selectedVoyage.cargo?.quantityUnit}</p>
+            <p><strong>Total:</strong> {selectedVoyage.cargo?.total}</p>
+            <p><strong>Rate USD:</strong> {selectedVoyage.cargo?.rateUSD}</p>
+            <p><strong>Agent:</strong> {selectedVoyage.agent}</p>
+            <p><strong>Consignee:</strong> {selectedVoyage.consignee}</p>
+            <p><strong>Remarks:</strong> {selectedVoyage.remarks}</p>
+            <button style={{ background: "#273c75", color: "#fff", padding: "8px 16px", border: "none", borderRadius: 4, cursor: "pointer" }} onClick={() => setEditMode(true)}>Edit</button>
+          </div>
+        ) : null}
+      </Modal>
     </div>
-  ) : null}
-</Modal>
+  );
+}
+
+export default App;
