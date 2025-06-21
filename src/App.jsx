@@ -1,292 +1,249 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-export default function App() {
+const initialForm = {
+  vesselName: "",
+  voyageNumber: "",
+  departureDate: "",
+  departurePort: "",
+  departureCountry: "",
+  arrivalDate: "",
+  arrivalPort: "",
+  arrivalCountry: "",
+  cargo: {
+    type: "",
+    quantityUnit: "MT",
+    total: "",
+    rateUSD: ""
+  },
+  agent: "",
+  consignee: "",
+  remarks: ""
+};
+
+const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
+function App() {
   const [voyages, setVoyages] = useState([]);
-  const [selectedVoyage, setSelectedVoyage] = useState(null);
-  const [form, setForm] = useState({
-    vesselName: "",
-    voyageNumber: "",
-    departureDate: "",
-    departurePort: "",
-    departureCountry: "",   // NEW
-    arrivalDate: "",
-    arrivalPort: "",
-    arrivalCountry: "",     // NEW
-    cargo: { type: "", quantityUnit: "MT", total: "", rateUSD: "" },
-    agent: "",              // NEW
-    consignee: "",          // NEW
-    remarks: "",
-  });
+  const [form, setForm] = useState(initialForm);
+  const [editId, setEditId] = useState(null);
+
+  // Fetch voyages
+  const fetchVoyages = async () => {
+    const res = await axios.get(`${API_BASE}/api/voyages`);
+    setVoyages(res.data);
+  };
 
   useEffect(() => {
     fetchVoyages();
   }, []);
 
-  async function fetchVoyages() {
-    try {
-      const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/voyages`);
-      setVoyages(res.data);
-    } catch (error) {
-      console.error("Error fetching voyages:", error);
-    }
-  }
-
-  function handleChange(e) {
+  // Handle form changes
+  const handleChange = e => {
     const { name, value } = e.target;
     if (name.startsWith("cargo.")) {
-      setForm((prev) => ({
+      const key = name.split(".")[1];
+      setForm(prev => ({
         ...prev,
-        cargo: { ...prev.cargo, [name.split(".")[1]]: value },
+        cargo: { ...prev.cargo, [key]: value }
       }));
     } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
+      setForm(prev => ({
+        ...prev,
+        [name]: value
+      }));
     }
-  }
+  };
 
-  async function handleSubmit(e) {
+  // Handle form submit (add or edit)
+  const handleSubmit = async e => {
     e.preventDefault();
     try {
-      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/voyages`, form);
-      setForm({
-        vesselName: "",
-        voyageNumber: "",
-        departureDate: "",
-        departurePort: "",
-        departureCountry: "",   // NEW
-        arrivalDate: "",
-        arrivalPort: "",
-        arrivalCountry: "",     // NEW
-        cargo: { type: "", quantityUnit: "MT", total: "", rateUSD: "" },
-        agent: "",              // NEW
-        consignee: "",          // NEW
-        remarks: "",
-      });
+      if (editId) {
+        await axios.put(`${API_BASE}/api/voyages/${editId}`, form);
+      } else {
+        await axios.post(`${API_BASE}/api/voyages`, form);
+      }
+      setForm(initialForm);
+      setEditId(null);
       fetchVoyages();
     } catch (error) {
-      console.error("Error adding voyage:", error);
+      alert(error.response?.data?.message || "Error saving voyage");
     }
-  }
+  };
+
+  // Populate form for editing
+  const handleEdit = voyage => {
+    setForm({
+      vesselName: voyage.vesselName || "",
+      voyageNumber: voyage.voyageNumber || "",
+      departureDate: voyage.departureDate ? voyage.departureDate.slice(0, 10) : "",
+      departurePort: voyage.departurePort || "",
+      departureCountry: voyage.departureCountry || "",
+      arrivalDate: voyage.arrivalDate ? voyage.arrivalDate.slice(0, 10) : "",
+      arrivalPort: voyage.arrivalPort || "",
+      arrivalCountry: voyage.arrivalCountry || "",
+      cargo: {
+        type: voyage.cargo?.type || "",
+        quantityUnit: voyage.cargo?.quantityUnit || "MT",
+        total: voyage.cargo?.total || "",
+        rateUSD: voyage.cargo?.rateUSD || ""
+      },
+      agent: voyage.agent || "",
+      consignee: voyage.consignee || "",
+      remarks: voyage.remarks || ""
+    });
+    setEditId(voyage._id);
+  };
+
+  // Cancel edit
+  const handleCancelEdit = () => {
+    setEditId(null);
+    setForm(initialForm);
+  };
 
   return (
-    <div style={{ padding: 20, maxWidth: 600, margin: "auto" }}>
-      <h2>Vessel Voyage Tracker</h2>
-
-      <form
-        onSubmit={handleSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: 8 }}
-      >
-        <input
-          name="vesselName"
-          placeholder="Vessel Name"
-          value={form.vesselName}
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="voyageNumber"
-          placeholder="Voyage Number"
-          value={form.voyageNumber}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="date"
-          name="departureDate"
-          value={form.departureDate}
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="departurePort"
-          placeholder="Departure Port"
-          value={form.departurePort}
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="departureCountry"
-          placeholder="Departure Country"
-          value={form.departureCountry}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="date"
-          name="arrivalDate"
-          value={form.arrivalDate}
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="arrivalPort"
-          placeholder="Arrival Port"
-          value={form.arrivalPort}
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="arrivalCountry"
-          placeholder="Arrival Country"
-          value={form.arrivalCountry}
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="cargo.type"
-          placeholder="Cargo Type"
-          value={form.cargo.type}
-          onChange={handleChange}
-          required
-        />
-        <select
-          name="cargo.quantityUnit"
-          value={form.cargo.quantityUnit}
-          onChange={handleChange}
-          required
-        >
-          <option value="MT">MT</option>
-          <option value="KG">KG</option>
-        </select>
-        <input
-          name="cargo.total"
-          placeholder="Total"
-          type="number"
-          min="0"
-          step="any"
-          value={form.cargo.total}
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="cargo.rateUSD"
-          placeholder="Rate in USD"
-          type="number"
-          min="0"
-          step="any"
-          value={form.cargo.rateUSD}
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="agent"
-          placeholder="Agent"
-          value={form.agent}
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="consignee"
-          placeholder="Consignee"
-          value={form.consignee}
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="remarks"
-          placeholder="Remarks"
-          value={form.remarks}
-          onChange={handleChange}
-        />
-        <button type="submit" style={{ marginTop: 10 }}>
-          Add Voyage
-        </button>
-      </form>
-
-      <h3 style={{ marginTop: 30 }}>Voyages</h3>
-
-      {voyages.length === 0 ? (
-        <p>No voyages yet.</p>
-      ) : (
-        <>
-          <ul style={{ padding: 0, listStyle: "none" }}>
-            {voyages.map((v) => (
-              <li
-                key={v._id || `${v.vesselName}-${v.voyageNumber}`}
-                onClick={() => setSelectedVoyage(v)}
-                style={{
-                  cursor: "pointer",
-                  padding: "10px 0",
-                  borderBottom: "1px solid #eee",
-                }}
-              >
-                <strong>{v.voyageNumber || "N/A"}</strong> — {v.vesselName || "N/A"}
-              </li>
-            ))}
-          </ul>
-
-          {/* Modal */}
-          {selectedVoyage && (
-            <div
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: "rgba(0,0,0,0.4)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 1000,
-              }}
-              onClick={() => setSelectedVoyage(null)}
-            >
-              <div
-                style={{
-                  background: "#fff",
-                  color: "#222",
-                  borderRadius: 8,
-                  padding: 24,
-                  minWidth: 320,
-                  boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
-                  position: "relative",
-                }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <button
-                  onClick={() => setSelectedVoyage(null)}
-                  style={{
-                    position: "absolute",
-                    top: 12,
-                    right: 12,
-                    border: "none",
-                    background: "transparent",
-                    fontSize: 20,
-                    cursor: "pointer",
-                  }}
-                  aria-label="Close"
-                >
-                  &times;
-                </button>
-                <h3>
-                  {selectedVoyage.vesselName} – Voyage #{selectedVoyage.voyageNumber}
-                </h3>
-                <p>
-                  <strong>From:</strong> {selectedVoyage.departurePort} ({selectedVoyage.departureCountry}) on {selectedVoyage.departureDate}
-                </p>
-                <p>
-                  <strong>To:</strong> {selectedVoyage.arrivalPort} ({selectedVoyage.arrivalCountry}) on {selectedVoyage.arrivalDate}
-                </p>
-                <p>
-                  <strong>Cargo:</strong> {selectedVoyage.cargo?.type} – {selectedVoyage.cargo?.total} {selectedVoyage.cargo?.quantityUnit} @ ${selectedVoyage.cargo?.rateUSD}
-                </p>
-                <p>
-                  <strong>Agent:</strong> {selectedVoyage.agent}
-                </p>
-                <p>
-                  <strong>Consignee:</strong> {selectedVoyage.consignee}
-                </p>
-                {selectedVoyage.remarks && (
-                  <p>
-                    <strong>Remarks:</strong> {selectedVoyage.remarks}
-                  </p>
-                )}
-              </div>
-            </div>
+    <div style={{ maxWidth: 900, margin: "2rem auto", fontFamily: "sans-serif" }}>
+      <h1>Voyages</h1>
+      <form onSubmit={handleSubmit} style={{ marginBottom: 32, border: "1px solid #ddd", padding: 16, borderRadius: 6 }}>
+        <h2>{editId ? "Edit Voyage" : "Add Voyage"}</h2>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
+          <div>
+            <label>Vessel Name<br />
+              <input name="vesselName" value={form.vesselName} onChange={handleChange} required />
+            </label>
+          </div>
+          <div>
+            <label>Voyage Number<br />
+              <input name="voyageNumber" value={form.voyageNumber} onChange={handleChange} required />
+            </label>
+          </div>
+          <div>
+            <label>Departure Date<br />
+              <input type="date" name="departureDate" value={form.departureDate} onChange={handleChange} required />
+            </label>
+          </div>
+          <div>
+            <label>Departure Port<br />
+              <input name="departurePort" value={form.departurePort} onChange={handleChange} required />
+            </label>
+          </div>
+          <div>
+            <label>Departure Country<br />
+              <input name="departureCountry" value={form.departureCountry} onChange={handleChange} />
+            </label>
+          </div>
+          <div>
+            <label>Arrival Date<br />
+              <input type="date" name="arrivalDate" value={form.arrivalDate} onChange={handleChange} required />
+            </label>
+          </div>
+          <div>
+            <label>Arrival Port<br />
+              <input name="arrivalPort" value={form.arrivalPort} onChange={handleChange} required />
+            </label>
+          </div>
+          <div>
+            <label>Arrival Country<br />
+              <input name="arrivalCountry" value={form.arrivalCountry} onChange={handleChange} />
+            </label>
+          </div>
+          <div>
+            <label>Cargo Type<br />
+              <input name="cargo.type" value={form.cargo.type} onChange={handleChange} />
+            </label>
+          </div>
+          <div>
+            <label>Quantity Unit<br />
+              <select name="cargo.quantityUnit" value={form.cargo.quantityUnit} onChange={handleChange}>
+                <option value="MT">MT</option>
+                <option value="KG">KG</option>
+              </select>
+            </label>
+          </div>
+          <div>
+            <label>Total<br />
+              <input type="number" name="cargo.total" value={form.cargo.total} onChange={handleChange} />
+            </label>
+          </div>
+          <div>
+            <label>Rate USD<br />
+              <input type="number" name="cargo.rateUSD" value={form.cargo.rateUSD} onChange={handleChange} />
+            </label>
+          </div>
+          <div>
+            <label>Agent<br />
+              <input name="agent" value={form.agent} onChange={handleChange} />
+            </label>
+          </div>
+          <div>
+            <label>Consignee<br />
+              <input name="consignee" value={form.consignee} onChange={handleChange} />
+            </label>
+          </div>
+          <div style={{ flex: 1 }}>
+            <label>Remarks<br />
+              <input name="remarks" value={form.remarks} onChange={handleChange} />
+            </label>
+          </div>
+        </div>
+        <div style={{ marginTop: 16 }}>
+          <button type="submit">{editId ? "Update" : "Add"}</button>
+          {editId && (
+            <button type="button" onClick={handleCancelEdit} style={{ marginLeft: 8 }}>
+              Cancel
+            </button>
           )}
-        </>
-      )}
+        </div>
+      </form>
+      <table border="1" cellPadding={6} cellSpacing={0} style={{ width: "100%", background: "#fff" }}>
+        <thead>
+          <tr>
+            <th>Vessel Name</th>
+            <th>Voyage #</th>
+            <th>Departure</th>
+            <th>Departure Country</th>
+            <th>Arrival</th>
+            <th>Arrival Country</th>
+            <th>Cargo</th>
+            <th>Agent</th>
+            <th>Consignee</th>
+            <th>Remarks</th>
+            <th>Edit</th>
+          </tr>
+        </thead>
+        <tbody>
+          {voyages.map(v => (
+            <tr key={v._id}>
+              <td>{v.vesselName}</td>
+              <td>{v.voyageNumber}</td>
+              <td>
+                {v.departurePort}<br />
+                {v.departureDate ? new Date(v.departureDate).toLocaleDateString() : ""}
+              </td>
+              <td>{v.departureCountry}</td>
+              <td>
+                {v.arrivalPort}<br />
+                {v.arrivalDate ? new Date(v.arrivalDate).toLocaleDateString() : ""}
+              </td>
+              <td>{v.arrivalCountry}</td>
+              <td>
+                {v.cargo?.type} <br />
+                {v.cargo?.total} {v.cargo?.quantityUnit} <br />
+                USD {v.cargo?.rateUSD}
+              </td>
+              <td>{v.agent}</td>
+              <td>{v.consignee}</td>
+              <td>{v.remarks}</td>
+              <td>
+                <button onClick={() => handleEdit(v)}>Edit</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
+
+export default App;
