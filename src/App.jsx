@@ -189,6 +189,7 @@ export default function App() {
                 right: 0,
                 bottom: 0,
                 background: "rgba(0,0,0,0.4)",
+                color: "#222", // <-- Add this line!
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
