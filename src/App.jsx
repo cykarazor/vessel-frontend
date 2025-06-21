@@ -199,5 +199,4 @@ function App() {
       {/* Modal for view/edit/add */}
       <Modal open={!!selectedVoyage} onClose={closeModal}>
         {editMode ? (
-          <form onSubmit={*
-
+          <form onSubmit={handleSubmit}>
