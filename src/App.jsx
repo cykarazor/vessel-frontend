@@ -29,10 +29,10 @@ const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 const initialForm = {
   vesselName: "",
   voyageNumber: "",
-  departureDate: "",
+  departureDate: null,
   departurePort: "",
   departureCountry: "",
-  arrivalDate: "",
+  arrivalDate: null,
   arrivalPort: "",
   arrivalCountry: "",
   cargo: {
@@ -79,10 +79,16 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const data = {
+      ...form,
+      departureDate: form.departureDate?.toISOString(),
+      arrivalDate: form.arrivalDate?.toISOString(),
+    };
+
     if (selectedVoyage && selectedVoyage._id) {
-      await axios.put(`${API_BASE}/api/voyages/${selectedVoyage._id}`, form);
+      await axios.put(`${API_BASE}/api/voyages/${selectedVoyage._id}`, data);
     } else {
-      await axios.post(`${API_BASE}/api/voyages`, form);
+      await axios.post(`${API_BASE}/api/voyages`, data);
     }
     setEditMode(false);
     setSelectedVoyage(null);
@@ -96,10 +102,10 @@ function App() {
     setForm({
       vesselName: voyage.vesselName || "",
       voyageNumber: voyage.voyageNumber || "",
-      departureDate: voyage.departureDate?.slice(0, 10) || "",
+      departureDate: voyage.departureDate ? new Date(voyage.departureDate) : null,
       departurePort: voyage.departurePort || "",
       departureCountry: voyage.departureCountry || "",
-      arrivalDate: voyage.arrivalDate?.slice(0, 10) || "",
+      arrivalDate: voyage.arrivalDate ? new Date(voyage.arrivalDate) : null,
       arrivalPort: voyage.arrivalPort || "",
       arrivalCountry: voyage.arrivalCountry || "",
       cargo: {
@@ -174,12 +180,7 @@ function App() {
           ))}
         </List>
 
-        <Dialog
-          open={!!selectedVoyage}
-          onClose={closeModal}
-          maxWidth="sm"
-          fullWidth
-        >
+        <Dialog open={!!selectedVoyage} onClose={closeModal} maxWidth="sm" fullWidth>
           <DialogTitle sx={{ m: 0, p: 2 }}>
             {editMode
               ? selectedVoyage._id
@@ -189,12 +190,7 @@ function App() {
             <IconButton
               aria-label="close"
               onClick={closeModal}
-              sx={{
-                position: "absolute",
-                right: 8,
-                top: 8,
-                color: (theme) => theme.palette.grey[500],
-              }}
+              sx={{ position: "absolute", right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}
             >
               <CloseIcon />
             </IconButton>
@@ -202,7 +198,7 @@ function App() {
 
           <DialogContent dividers>
             {editMode ? (
-              <Box component="form" onSubmit={handleSubmit} noValidate>
+              <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }} noValidate>
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
                     <TextField
@@ -214,6 +210,7 @@ function App() {
                       onChange={handleChange}
                     />
                   </Grid>
+
                   <Grid item xs={12}>
                     <TextField
                       required
@@ -225,21 +222,19 @@ function App() {
                     />
                   </Grid>
 
-                  {/* Departure Info */}
+                  {/* Departure Section */}
                   <Grid item xs={12}>
-                    <Typography variant="subtitle1">Departure</Typography>
+                    <Typography variant="h6" sx={{ mt: 2, mb: 1, fontWeight: "bold" }}>
+                      Departure Information
+                    </Typography>
                   </Grid>
+
                   <Grid item xs={12} sm={6}>
                     <DatePicker
                       label="Departure Date"
-                      value={form.departureDate || null}
+                      value={form.departureDate}
                       onChange={(newValue) =>
-                        setForm((prev) => ({
-                          ...prev,
-                          departureDate: newValue
-                            ? newValue.toISOString().split("T")[0]
-                            : "",
-                        }))
+                        setForm((prev) => ({ ...prev, departureDate: newValue }))
                       }
                       renderInput={(params) => (
                         <TextField fullWidth required {...params} />
@@ -248,8 +243,8 @@ function App() {
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <TextField
-                      required
                       fullWidth
+                      required
                       name="departurePort"
                       label="Departure Port"
                       value={form.departurePort}
@@ -266,21 +261,19 @@ function App() {
                     />
                   </Grid>
 
-                  {/* Arrival Info */}
+                  {/* Arrival Section */}
                   <Grid item xs={12}>
-                    <Typography variant="subtitle1">Arrival</Typography>
+                    <Typography variant="h6" sx={{ mt: 2, mb: 1, fontWeight: "bold" }}>
+                      Arrival Information
+                    </Typography>
                   </Grid>
+
                   <Grid item xs={12} sm={6}>
                     <DatePicker
                       label="Arrival Date"
-                      value={form.arrivalDate || null}
+                      value={form.arrivalDate}
                       onChange={(newValue) =>
-                        setForm((prev) => ({
-                          ...prev,
-                          arrivalDate: newValue
-                            ? newValue.toISOString().split("T")[0]
-                            : "",
-                        }))
+                        setForm((prev) => ({ ...prev, arrivalDate: newValue }))
                       }
                       renderInput={(params) => (
                         <TextField fullWidth required {...params} />
@@ -289,8 +282,8 @@ function App() {
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <TextField
-                      required
                       fullWidth
+                      required
                       name="arrivalPort"
                       label="Arrival Port"
                       value={form.arrivalPort}
@@ -307,10 +300,13 @@ function App() {
                     />
                   </Grid>
 
-                  {/* Cargo Info */}
+                  {/* Cargo Section */}
                   <Grid item xs={12}>
-                    <Typography variant="subtitle1">Cargo</Typography>
+                    <Typography variant="h6" sx={{ mt: 2, mb: 1, fontWeight: "bold" }}>
+                      Cargo Information
+                    </Typography>
                   </Grid>
+
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
@@ -320,6 +316,7 @@ function App() {
                       onChange={handleChange}
                     />
                   </Grid>
+
                   <Grid item xs={6}>
                     <TextField
                       select
@@ -355,8 +352,7 @@ function App() {
                     />
                   </Grid>
 
-                  {/* Others */}
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
                       name="agent"
@@ -365,7 +361,7 @@ function App() {
                       onChange={handleChange}
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
                       name="consignee"
@@ -374,6 +370,7 @@ function App() {
                       onChange={handleChange}
                     />
                   </Grid>
+
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
@@ -387,27 +384,20 @@ function App() {
               </Box>
             ) : (
               <Box>
-                {Object.entries({
-                  "Vessel Name": form.vesselName,
-                  "Voyage Number": form.voyageNumber,
-                  "Departure Date": form.departureDate,
-                  "Departure Port": form.departurePort,
-                  "Departure Country": form.departureCountry,
-                  "Arrival Date": form.arrivalDate,
-                  "Arrival Port": form.arrivalPort,
-                  "Arrival Country": form.arrivalCountry,
-                  "Cargo Type": form.cargo.type,
-                  "Quantity Unit": form.cargo.quantityUnit,
-                  "Total": form.cargo.total,
-                  "Rate USD": form.cargo.rateUSD,
-                  Agent: form.agent,
-                  Consignee: form.consignee,
-                  Remarks: form.remarks,
-                }).map(([label, value]) => (
-                  <Typography variant="body1" gutterBottom key={label}>
-                    <strong>{label}:</strong> {value}
-                  </Typography>
-                ))}
+                {Object.entries(form).map(([key, value]) => {
+                  if (key === "cargo") {
+                    return Object.entries(value).map(([k, v]) => (
+                      <Typography key={k} variant="body1" gutterBottom>
+                        <strong>{k}:</strong> {v}
+                      </Typography>
+                    ));
+                  }
+                  return (
+                    <Typography key={key} variant="body1" gutterBottom>
+                      <strong>{key}:</strong> {value?.toString()}
+                    </Typography>
+                  );
+                })}
                 <Button
                   startIcon={<EditIcon />}
                   variant="contained"
