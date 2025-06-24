@@ -24,6 +24,7 @@ import {
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
@@ -169,21 +170,354 @@ function App() {
             </IconButton>
           </DialogTitle>
           <DialogContent dividers>
-            <Grid container spacing={2}>
-              {/* Card Groups here ... same as before */}
-            </Grid>
-          </DialogContent>
-          <DialogActions>
-            {!editMode && (
-              <Button variant="outlined" onClick={() => setEditMode(true)}>Edit</Button>
-            )}
-            {editMode && (
+            {editMode ? (
+              <Box component="form" onSubmit={handleSubmit} noValidate autoComplete="off" sx={{ mt: 1 }}>
+                <Grid container spacing={2}>
+
+                  {/* Voyage Info */}
+                  <Grid item xs={12}>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>Voyage Info</Typography>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} sm={6}>
+                            <TextField
+                              fullWidth
+                              name="voyageNumber"
+                              label="Voyage Number"
+                              value={form.voyageNumber}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <TextField
+                              fullWidth
+                              name="vesselName"
+                              label="Vessel Name"
+                              value={form.vesselName}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  {/* Departure Details */}
+                  <Grid item xs={12}>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>Departure Details</Typography>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} sm={4}>
+                            <TextField
+                              fullWidth
+                              name="departurePort"
+                              label="Departure Port"
+                              value={form.departurePort}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={4}>
+                            <TextField
+                              fullWidth
+                              name="departureCountry"
+                              label="Departure Country"
+                              value={form.departureCountry}
+                              onChange={handleChange}
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={4}>
+                            <DatePicker
+                              label="Departure Date"
+                              value={form.departureDate}
+                              onChange={(date) => handleDateChange("departureDate", date)}
+                              slotProps={{ textField: { fullWidth: true, required: true } }}
+                            />
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  {/* Arrival Details */}
+                  <Grid item xs={12}>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>Arrival Details</Typography>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} sm={4}>
+                            <TextField
+                              fullWidth
+                              name="arrivalPort"
+                              label="Arrival Port"
+                              value={form.arrivalPort}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={4}>
+                            <TextField
+                              fullWidth
+                              name="arrivalCountry"
+                              label="Arrival Country"
+                              value={form.arrivalCountry}
+                              onChange={handleChange}
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={4}>
+                            <DatePicker
+                              label="Arrival Date"
+                              value={form.arrivalDate}
+                              onChange={(date) => handleDateChange("arrivalDate", date)}
+                              slotProps={{ textField: { fullWidth: true, required: true } }}
+                            />
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  {/* Cargo Details */}
+                  <Grid item xs={12}>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>Cargo Details</Typography>
+                        <Grid container spacing={2}>
+                          <Grid item xs={6} sm={3}>
+                            <TextField
+                              fullWidth
+                              name="cargo.type"
+                              label="Type"
+                              value={form.cargo.type}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Grid>
+                          <Grid item xs={6} sm={3}>
+                            <TextField
+                              fullWidth
+                              select
+                              label="Quantity Unit"
+                              name="cargo.quantityUnit"
+                              value={form.cargo.quantityUnit}
+                              onChange={handleChange}
+                              SelectProps={{ native: true }}
+                            >
+                              <option value="MT">MT</option>
+                              <option value="KG">KG</option>
+                            </TextField>
+                          </Grid>
+                          <Grid item xs={6} sm={3}>
+                            <TextField
+                              fullWidth
+                              type="number"
+                              label="Total"
+                              name="cargo.total"
+                              value={form.cargo.total}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Grid>
+                          <Grid item xs={6} sm={3}>
+                            <TextField
+                              fullWidth
+                              type="number"
+                              label="Rate (USD)"
+                              name="cargo.rateUSD"
+                              value={form.cargo.rateUSD}
+                              onChange={handleChange}
+                            />
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  {/* Agent & Consignee */}
+                  <Grid item xs={12}>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>Agent & Consignee</Typography>
+                        <Grid container spacing={2}>
+                          <Grid item xs={6}>
+                            <TextField
+                              fullWidth
+                              name="agent"
+                              label="Agent"
+                              value={form.agent}
+                              onChange={handleChange}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <TextField
+                              fullWidth
+                              name="consignee"
+                              label="Consignee"
+                              value={form.consignee}
+                              onChange={handleChange}
+                            />
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  {/* Remarks */}
+                  <Grid item xs={12}>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>Remarks</Typography>
+                        <TextField
+                          fullWidth
+                          multiline
+                          minRows={3}
+                          maxRows={8}
+                          name="remarks"
+                          label="Remarks"
+                          value={form.remarks}
+                          onChange={handleChange}
+                        />
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                </Grid>
+              </Box>
+            ) : (
               <>
-                <Button variant="contained" onClick={handleSubmit}>Save</Button>
-                <Button onClick={closeModal}>Cancel</Button>
+                <Grid container spacing={2}>
+
+                  {/* Voyage Info */}
+                  <Grid item xs={12}>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>Voyage Info</Typography>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} sm={6}>
+                            <Typography><strong>Voyage Number:</strong> {form.voyageNumber}</Typography>
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Typography><strong>Vessel Name:</strong> {form.vesselName}</Typography>
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  {/* Departure Details */}
+                  <Grid item xs={12}>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>Departure Details</Typography>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} sm={4}>
+                            <Typography><strong>Departure Port:</strong> {form.departurePort}</Typography>
+                          </Grid>
+                          <Grid item xs={12} sm={4}>
+                            <Typography><strong>Departure Country:</strong> {form.departureCountry}</Typography>
+                          </Grid>
+                          <Grid item xs={12} sm={4}>
+                            <Typography><strong>Departure Date:</strong> {form.departureDate ? form.departureDate.format("YYYY-MM-DD") : ""}</Typography>
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  {/* Arrival Details */}
+                  <Grid item xs={12}>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>Arrival Details</Typography>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} sm={4}>
+                            <Typography><strong>Arrival Port:</strong> {form.arrivalPort}</Typography>
+                          </Grid>
+                          <Grid item xs={12} sm={4}>
+                            <Typography><strong>Arrival Country:</strong> {form.arrivalCountry}</Typography>
+                          </Grid>
+                          <Grid item xs={12} sm={4}>
+                            <Typography><strong>Arrival Date:</strong> {form.arrivalDate ? form.arrivalDate.format("YYYY-MM-DD") : ""}</Typography>
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  {/* Cargo Details */}
+                  <Grid item xs={12}>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>Cargo Details</Typography>
+                        <Grid container spacing={2}>
+                          <Grid item xs={6} sm={3}>
+                            <Typography><strong>Type:</strong> {form.cargo.type}</Typography>
+                          </Grid>
+                          <Grid item xs={6} sm={3}>
+                            <Typography><strong>Unit:</strong> {form.cargo.quantityUnit}</Typography>
+                          </Grid>
+                          <Grid item xs={6} sm={3}>
+                            <Typography><strong>Total:</strong> {form.cargo.total}</Typography>
+                          </Grid>
+                          <Grid item xs={6} sm={3}>
+                            <Typography><strong>Rate (USD):</strong> {form.cargo.rateUSD}</Typography>
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  {/* Agent & Consignee */}
+                  <Grid item xs={12}>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>Agent & Consignee</Typography>
+                        <Grid container spacing={2}>
+                          <Grid item xs={6}>
+                            <Typography><strong>Agent:</strong> {form.agent}</Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography><strong>Consignee:</strong> {form.consignee}</Typography>
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  {/* Remarks */}
+                  <Grid item xs={12}>
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography variant="h6" gutterBottom>Remarks</Typography>
+                        <Typography sx={{ whiteSpace: "pre-line" }}>{form.remarks}</Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                </Grid>
+
+                <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
+                  <Button
+                    variant="contained"
+                    startIcon={<EditIcon />}
+                    onClick={() => setEditMode(true)}
+                  >
+                    Edit
+                  </Button>
+                </Box>
               </>
             )}
-          </DialogActions>
+          </DialogContent>
+
+          {editMode && (
+            <DialogActions>
+              <Button onClick={closeModal} color="inherit">Cancel</Button>
+              <Button onClick={handleSubmit} variant="contained" type="submit">Save</Button>
+            </DialogActions>
+          )}
         </Dialog>
       </Box>
     </LocalizationProvider>
