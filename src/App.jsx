@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import dayjs from "dayjs";
-
 import {
   Box,
   Button,
@@ -17,13 +16,11 @@ import {
   ListItemText,
   Paper,
 } from "@mui/material";
-
 import {
-  LocalizationProvider,
   DatePicker,
+  LocalizationProvider,
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
@@ -81,20 +78,25 @@ function App() {
     }
   };
 
+  const handleDateChange = (name, date) => {
+    setForm((prev) => ({
+      ...prev,
+      [name]: date,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = {
       ...form,
-      departureDate: form.departureDate?.toISOString(),
-      arrivalDate: form.arrivalDate?.toISOString(),
+      departureDate: form.departureDate ? dayjs(form.departureDate).toISOString() : null,
+      arrivalDate: form.arrivalDate ? dayjs(form.arrivalDate).toISOString() : null,
     };
-
     if (selectedVoyage && selectedVoyage._id) {
       await axios.put(`${API_BASE}/api/voyages/${selectedVoyage._id}`, payload);
     } else {
       await axios.post(`${API_BASE}/api/voyages`, payload);
     }
-
     setEditMode(false);
     setSelectedVoyage(null);
     setForm(initialForm);
@@ -139,8 +141,15 @@ function App() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box sx={{ p: 2, maxWidth: 600, mx: "auto" }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+      <Box sx={{ p: 2, maxWidth: 900, mx: "auto" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
           <Typography variant="h4" color="primary">
             Voyages
           </Typography>
@@ -176,12 +185,7 @@ function App() {
           ))}
         </List>
 
-        <Dialog
-          open={!!selectedVoyage}
-          onClose={closeModal}
-          maxWidth="sm"
-          fullWidth
-        >
+        <Dialog open={!!selectedVoyage} onClose={closeModal} maxWidth="md" fullWidth>
           <DialogTitle>
             {editMode
               ? selectedVoyage._id
@@ -195,28 +199,26 @@ function App() {
               <CloseIcon />
             </IconButton>
           </DialogTitle>
-
           <DialogContent dividers>
             {editMode ? (
               <Box component="form" onSubmit={handleSubmit} noValidate>
                 <Grid container spacing={2}>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={6}>
                     <TextField
-                      required
                       fullWidth
-                      name="vesselName"
+                      required
                       label="Vessel Name"
+                      name="vesselName"
                       value={form.vesselName}
                       onChange={handleChange}
                     />
                   </Grid>
-
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={6}>
                     <TextField
-                      required
                       fullWidth
-                      name="voyageNumber"
+                      required
                       label="Voyage Number"
+                      name="voyageNumber"
                       value={form.voyageNumber}
                       onChange={handleChange}
                     />
@@ -224,30 +226,29 @@ function App() {
 
                   {/* Departure Group */}
                   <Grid item xs={12}>
-                    <Typography variant="h6" gutterBottom>
-                      Departure
-                    </Typography>
+                    <Typography variant="subtitle1">Departure</Typography>
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={4}>
                     <DatePicker
                       label="Departure Date"
                       value={form.departureDate}
-                      onChange={(newVal) =>
-                        setForm((prev) => ({ ...prev, departureDate: newVal }))
-                      }
-                      slotProps={{ textField: { fullWidth: true } }}
+                      onChange={(date) => handleDateChange("departureDate", date)}
+                      renderInput={(params) => (
+                        <TextField fullWidth required {...params} />
+                      )}
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={4}>
                     <TextField
                       fullWidth
+                      required
                       label="Departure Port"
                       name="departurePort"
                       value={form.departurePort}
                       onChange={handleChange}
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={4}>
                     <TextField
                       fullWidth
                       label="Departure Country"
@@ -259,30 +260,29 @@ function App() {
 
                   {/* Arrival Group */}
                   <Grid item xs={12}>
-                    <Typography variant="h6" gutterBottom>
-                      Arrival
-                    </Typography>
+                    <Typography variant="subtitle1">Arrival</Typography>
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={4}>
                     <DatePicker
                       label="Arrival Date"
                       value={form.arrivalDate}
-                      onChange={(newVal) =>
-                        setForm((prev) => ({ ...prev, arrivalDate: newVal }))
-                      }
-                      slotProps={{ textField: { fullWidth: true } }}
+                      onChange={(date) => handleDateChange("arrivalDate", date)}
+                      renderInput={(params) => (
+                        <TextField fullWidth required {...params} />
+                      )}
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={4}>
                     <TextField
                       fullWidth
+                      required
                       label="Arrival Port"
                       name="arrivalPort"
                       value={form.arrivalPort}
                       onChange={handleChange}
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={4}>
                     <TextField
                       fullWidth
                       label="Arrival Country"
@@ -292,71 +292,74 @@ function App() {
                     />
                   </Grid>
 
-                  {/* Cargo Group */}
+                  {/* Cargo Section */}
                   <Grid item xs={12}>
-                    <Typography variant="h6" gutterBottom>
-                      Cargo Information
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      name="cargo.type"
-                      label="Cargo Type"
-                      value={form.cargo.type}
-                      onChange={handleChange}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      select
-                      fullWidth
-                      label="Quantity Unit"
-                      name="cargo.quantityUnit"
-                      value={form.cargo.quantityUnit}
-                      onChange={handleChange}
-                      SelectProps={{ native: true }}
-                    >
-                      <option value="MT">MT</option>
-                      <option value="KG">KG</option>
-                    </TextField>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      type="number"
-                      label="Total"
-                      name="cargo.total"
-                      value={form.cargo.total}
-                      onChange={handleChange}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      type="number"
-                      label="Rate USD"
-                      name="cargo.rateUSD"
-                      value={form.cargo.rateUSD}
-                      onChange={handleChange}
-                    />
+                    <Paper sx={{ p: 2 }} variant="outlined">
+                      <Typography variant="subtitle1" gutterBottom>
+                        Cargo Information
+                      </Typography>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} sm={4}>
+                          <TextField
+                            fullWidth
+                            label="Cargo Type"
+                            name="cargo.type"
+                            value={form.cargo.type}
+                            onChange={handleChange}
+                          />
+                        </Grid>
+                        <Grid item xs={6} sm={2}>
+                          <TextField
+                            select
+                            fullWidth
+                            label="Unit"
+                            name="cargo.quantityUnit"
+                            value={form.cargo.quantityUnit}
+                            onChange={handleChange}
+                            SelectProps={{ native: true }}
+                          >
+                            <option value="MT">MT</option>
+                            <option value="KG">KG</option>
+                          </TextField>
+                        </Grid>
+                        <Grid item xs={6} sm={3}>
+                          <TextField
+                            fullWidth
+                            type="number"
+                            label="Total"
+                            name="cargo.total"
+                            value={form.cargo.total}
+                            onChange={handleChange}
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={3}>
+                          <TextField
+                            fullWidth
+                            type="number"
+                            label="Rate USD"
+                            name="cargo.rateUSD"
+                            value={form.cargo.rateUSD}
+                            onChange={handleChange}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Paper>
                   </Grid>
 
-                  {/* Other */}
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
-                      name="agent"
                       label="Agent"
+                      name="agent"
                       value={form.agent}
                       onChange={handleChange}
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
-                      name="consignee"
                       label="Consignee"
+                      name="consignee"
                       value={form.consignee}
                       onChange={handleChange}
                     />
@@ -364,8 +367,8 @@ function App() {
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      name="remarks"
                       label="Remarks"
+                      name="remarks"
                       value={form.remarks}
                       onChange={handleChange}
                     />
@@ -373,42 +376,9 @@ function App() {
                 </Grid>
               </Box>
             ) : (
-              <Box>
-                {Object.entries({
-                  "Vessel Name": form.vesselName,
-                  "Voyage Number": form.voyageNumber,
-                  "Departure Date": form.departureDate?.format("YYYY-MM-DD"),
-                  "Departure Port": form.departurePort,
-                  "Departure Country": form.departureCountry,
-                  "Arrival Date": form.arrivalDate?.format("YYYY-MM-DD"),
-                  "Arrival Port": form.arrivalPort,
-                  "Arrival Country": form.arrivalCountry,
-                  "Cargo Type": form.cargo.type,
-                  "Quantity Unit": form.cargo.quantityUnit,
-                  "Total": form.cargo.total,
-                  "Rate USD": form.cargo.rateUSD,
-                  "Agent": form.agent,
-                  "Consignee": form.consignee,
-                  "Remarks": form.remarks,
-                }).map(([label, value]) => (
-                  <Typography key={label} variant="body1" gutterBottom>
-                    <strong>{label}:</strong> {value}
-                  </Typography>
-                ))}
-
-                <Button
-                  startIcon={<EditIcon />}
-                  variant="contained"
-                  onClick={() => setEditMode(true)}
-                  fullWidth
-                  sx={{ mt: 2 }}
-                >
-                  Edit
-                </Button>
-              </Box>
+              <Typography>Display view goes here (if needed)</Typography>
             )}
           </DialogContent>
-
           {editMode && (
             <DialogActions>
               <Button onClick={closeModal} color="inherit">
