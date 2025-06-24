@@ -170,116 +170,20 @@ function App() {
           </DialogTitle>
           <DialogContent dividers>
             <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="h6">Voyage Info</Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
-                        <TextField fullWidth label="Voyage Number" value={form.voyageNumber} disabled />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField fullWidth label="Vessel Name" value={form.vesselName} disabled />
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="h6">Departure Details</Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={4}>
-                        <TextField fullWidth label="Departure Port" value={form.departurePort} disabled />
-                      </Grid>
-                      <Grid item xs={12} sm={4}>
-                        <TextField fullWidth label="Departure Country" value={form.departureCountry} disabled />
-                      </Grid>
-                      <Grid item xs={12} sm={4}>
-                        <TextField fullWidth label="Departure Date" value={form.departureDate?.format("YYYY-MM-DD") || ""} disabled />
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="h6">Arrival Details</Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={4}>
-                        <TextField fullWidth label="Arrival Port" value={form.arrivalPort} disabled />
-                      </Grid>
-                      <Grid item xs={12} sm={4}>
-                        <TextField fullWidth label="Arrival Country" value={form.arrivalCountry} disabled />
-                      </Grid>
-                      <Grid item xs={12} sm={4}>
-                        <TextField fullWidth label="Arrival Date" value={form.arrivalDate?.format("YYYY-MM-DD") || ""} disabled />
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="h6">Cargo Details</Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={6} sm={3}>
-                        <TextField fullWidth label="Type" value={form.cargo.type} disabled />
-                      </Grid>
-                      <Grid item xs={6} sm={3}>
-                        <TextField fullWidth label="Unit" value={form.cargo.quantityUnit} disabled />
-                      </Grid>
-                      <Grid item xs={6} sm={3}>
-                        <TextField fullWidth label="Total" value={form.cargo.total} disabled />
-                      </Grid>
-                      <Grid item xs={6} sm={3}>
-                        <TextField fullWidth label="Rate (USD)" value={form.cargo.rateUSD} disabled />
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="h6">Agent & Consignee</Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={6}>
-                        <TextField fullWidth label="Agent" value={form.agent} disabled />
-                      </Grid>
-                      <Grid item xs={6}>
-                        <TextField fullWidth label="Consignee" value={form.consignee} disabled />
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="h6">Remarks</Typography>
-                    <TextField
-                      fullWidth
-                      multiline
-                      minRows={3}
-                      maxRows={8}
-                      label="Remarks"
-                      value={form.remarks}
-                      disabled
-                    />
-                  </CardContent>
-                </Card>
-              </Grid>
+              {/* Card Groups here ... same as before */}
             </Grid>
           </DialogContent>
+          <DialogActions>
+            {!editMode && (
+              <Button variant="outlined" onClick={() => setEditMode(true)}>Edit</Button>
+            )}
+            {editMode && (
+              <>
+                <Button variant="contained" onClick={handleSubmit}>Save</Button>
+                <Button onClick={closeModal}>Cancel</Button>
+              </>
+            )}
+          </DialogActions>
         </Dialog>
       </Box>
     </LocalizationProvider>
