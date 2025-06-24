@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import dayjs from "dayjs";
+
 import {
   Box,
   Button,
@@ -16,9 +18,11 @@ import {
   Paper,
 } from "@mui/material";
 
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import {
+  LocalizationProvider,
+  DatePicker,
+} from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import EditIcon from "@mui/icons-material/Edit";
@@ -79,17 +83,18 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = {
+    const payload = {
       ...form,
       departureDate: form.departureDate?.toISOString(),
       arrivalDate: form.arrivalDate?.toISOString(),
     };
 
     if (selectedVoyage && selectedVoyage._id) {
-      await axios.put(`${API_BASE}/api/voyages/${selectedVoyage._id}`, data);
+      await axios.put(`${API_BASE}/api/voyages/${selectedVoyage._id}`, payload);
     } else {
-      await axios.post(`${API_BASE}/api/voyages`, data);
+      await axios.post(`${API_BASE}/api/voyages`, payload);
     }
+
     setEditMode(false);
     setSelectedVoyage(null);
     setForm(initialForm);
@@ -102,10 +107,10 @@ function App() {
     setForm({
       vesselName: voyage.vesselName || "",
       voyageNumber: voyage.voyageNumber || "",
-      departureDate: voyage.departureDate ? new Date(voyage.departureDate) : null,
+      departureDate: voyage.departureDate ? dayjs(voyage.departureDate) : null,
       departurePort: voyage.departurePort || "",
       departureCountry: voyage.departureCountry || "",
-      arrivalDate: voyage.arrivalDate ? new Date(voyage.arrivalDate) : null,
+      arrivalDate: voyage.arrivalDate ? dayjs(voyage.arrivalDate) : null,
       arrivalPort: voyage.arrivalPort || "",
       arrivalCountry: voyage.arrivalCountry || "",
       cargo: {
@@ -133,16 +138,9 @@ function App() {
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ p: 2, maxWidth: 600, mx: "auto" }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 2,
-          }}
-        >
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
           <Typography variant="h4" color="primary">
             Voyages
           </Typography>
@@ -170,9 +168,7 @@ function App() {
             >
               <ListItemText
                 primary={
-                  <Typography variant="h6" component="div">
-                    {v.vesselName}
-                  </Typography>
+                  <Typography variant="h6">{v.vesselName}</Typography>
                 }
                 secondary={`Voyage #${v.voyageNumber}`}
               />
@@ -180,17 +176,21 @@ function App() {
           ))}
         </List>
 
-        <Dialog open={!!selectedVoyage} onClose={closeModal} maxWidth="sm" fullWidth>
-          <DialogTitle sx={{ m: 0, p: 2 }}>
+        <Dialog
+          open={!!selectedVoyage}
+          onClose={closeModal}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>
             {editMode
               ? selectedVoyage._id
                 ? "Edit Voyage"
                 : "Add Voyage"
               : "Voyage Details"}
             <IconButton
-              aria-label="close"
               onClick={closeModal}
-              sx={{ position: "absolute", right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}
+              sx={{ position: "absolute", right: 8, top: 8 }}
             >
               <CloseIcon />
             </IconButton>
@@ -198,7 +198,7 @@ function App() {
 
           <DialogContent dividers>
             {editMode ? (
-              <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }} noValidate>
+              <Box component="form" onSubmit={handleSubmit} noValidate>
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
                     <TextField
@@ -222,31 +222,27 @@ function App() {
                     />
                   </Grid>
 
-                  {/* Departure Section */}
+                  {/* Departure Group */}
                   <Grid item xs={12}>
-                    <Typography variant="h6" sx={{ mt: 2, mb: 1, fontWeight: "bold" }}>
-                      Departure Information
+                    <Typography variant="h6" gutterBottom>
+                      Departure
                     </Typography>
                   </Grid>
-
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12}>
                     <DatePicker
                       label="Departure Date"
                       value={form.departureDate}
-                      onChange={(newValue) =>
-                        setForm((prev) => ({ ...prev, departureDate: newValue }))
+                      onChange={(newVal) =>
+                        setForm((prev) => ({ ...prev, departureDate: newVal }))
                       }
-                      renderInput={(params) => (
-                        <TextField fullWidth required {...params} />
-                      )}
+                      slotProps={{ textField: { fullWidth: true } }}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      required
-                      name="departurePort"
                       label="Departure Port"
+                      name="departurePort"
                       value={form.departurePort}
                       onChange={handleChange}
                     />
@@ -254,38 +250,34 @@ function App() {
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      name="departureCountry"
                       label="Departure Country"
+                      name="departureCountry"
                       value={form.departureCountry}
                       onChange={handleChange}
                     />
                   </Grid>
 
-                  {/* Arrival Section */}
+                  {/* Arrival Group */}
                   <Grid item xs={12}>
-                    <Typography variant="h6" sx={{ mt: 2, mb: 1, fontWeight: "bold" }}>
-                      Arrival Information
+                    <Typography variant="h6" gutterBottom>
+                      Arrival
                     </Typography>
                   </Grid>
-
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12}>
                     <DatePicker
                       label="Arrival Date"
                       value={form.arrivalDate}
-                      onChange={(newValue) =>
-                        setForm((prev) => ({ ...prev, arrivalDate: newValue }))
+                      onChange={(newVal) =>
+                        setForm((prev) => ({ ...prev, arrivalDate: newVal }))
                       }
-                      renderInput={(params) => (
-                        <TextField fullWidth required {...params} />
-                      )}
+                      slotProps={{ textField: { fullWidth: true } }}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      required
-                      name="arrivalPort"
                       label="Arrival Port"
+                      name="arrivalPort"
                       value={form.arrivalPort}
                       onChange={handleChange}
                     />
@@ -293,20 +285,19 @@ function App() {
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      name="arrivalCountry"
                       label="Arrival Country"
+                      name="arrivalCountry"
                       value={form.arrivalCountry}
                       onChange={handleChange}
                     />
                   </Grid>
 
-                  {/* Cargo Section */}
+                  {/* Cargo Group */}
                   <Grid item xs={12}>
-                    <Typography variant="h6" sx={{ mt: 2, mb: 1, fontWeight: "bold" }}>
+                    <Typography variant="h6" gutterBottom>
                       Cargo Information
                     </Typography>
                   </Grid>
-
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
@@ -316,8 +307,7 @@ function App() {
                       onChange={handleChange}
                     />
                   </Grid>
-
-                  <Grid item xs={6}>
+                  <Grid item xs={12}>
                     <TextField
                       select
                       fullWidth
@@ -331,7 +321,7 @@ function App() {
                       <option value="KG">KG</option>
                     </TextField>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid item xs={12}>
                     <TextField
                       fullWidth
                       type="number"
@@ -352,7 +342,8 @@ function App() {
                     />
                   </Grid>
 
-                  <Grid item xs={12} sm={6}>
+                  {/* Other */}
+                  <Grid item xs={12}>
                     <TextField
                       fullWidth
                       name="agent"
@@ -361,7 +352,7 @@ function App() {
                       onChange={handleChange}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12}>
                     <TextField
                       fullWidth
                       name="consignee"
@@ -370,7 +361,6 @@ function App() {
                       onChange={handleChange}
                     />
                   </Grid>
-
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
@@ -384,26 +374,34 @@ function App() {
               </Box>
             ) : (
               <Box>
-                {Object.entries(form).map(([key, value]) => {
-                  if (key === "cargo") {
-                    return Object.entries(value).map(([k, v]) => (
-                      <Typography key={k} variant="body1" gutterBottom>
-                        <strong>{k}:</strong> {v}
-                      </Typography>
-                    ));
-                  }
-                  return (
-                    <Typography key={key} variant="body1" gutterBottom>
-                      <strong>{key}:</strong> {value?.toString()}
-                    </Typography>
-                  );
-                })}
+                {Object.entries({
+                  "Vessel Name": form.vesselName,
+                  "Voyage Number": form.voyageNumber,
+                  "Departure Date": form.departureDate?.format("YYYY-MM-DD"),
+                  "Departure Port": form.departurePort,
+                  "Departure Country": form.departureCountry,
+                  "Arrival Date": form.arrivalDate?.format("YYYY-MM-DD"),
+                  "Arrival Port": form.arrivalPort,
+                  "Arrival Country": form.arrivalCountry,
+                  "Cargo Type": form.cargo.type,
+                  "Quantity Unit": form.cargo.quantityUnit,
+                  "Total": form.cargo.total,
+                  "Rate USD": form.cargo.rateUSD,
+                  "Agent": form.agent,
+                  "Consignee": form.consignee,
+                  "Remarks": form.remarks,
+                }).map(([label, value]) => (
+                  <Typography key={label} variant="body1" gutterBottom>
+                    <strong>{label}:</strong> {value}
+                  </Typography>
+                ))}
+
                 <Button
                   startIcon={<EditIcon />}
                   variant="contained"
                   onClick={() => setEditMode(true)}
-                  sx={{ mt: 2 }}
                   fullWidth
+                  sx={{ mt: 2 }}
                 >
                   Edit
                 </Button>
