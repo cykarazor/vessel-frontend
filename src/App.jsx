@@ -388,22 +388,9 @@ function App() {
         </Paper>
 
         {/* Modal for Add / View / Edit Voyage */}
-        <Dialog
-  open={Boolean(selectedVoyage)}
-  onClose={closeModal}
-  maxWidth="md"
-  fullWidth
-  PaperProps={{ sx: { borderRadius: 3 } }}
->
-  <DialogTitle
-    sx={{
-      fontWeight: 600,
-      fontSize: "1.5rem",
-      backgroundColor: "#f5f5f5",
-      borderBottom: "1px solid #ddd",
-      pr: 5,
-    }}
-  >
+        {/* Modal for Add / View / Edit Voyage */}
+<Dialog open={Boolean(selectedVoyage)} onClose={closeModal} maxWidth="md" fullWidth>
+  <DialogTitle sx={{ position: 'relative' }}>
     {editMode
       ? selectedVoyage?._id
         ? "Edit Voyage"
@@ -414,255 +401,213 @@ function App() {
       onClick={closeModal}
       sx={{
         position: "absolute",
-        right: 16,
-        top: 16,
-        color: (theme) => theme.palette.grey[600],
+        right: 8,
+        top: 8,
       }}
     >
       <CloseIcon />
     </IconButton>
   </DialogTitle>
 
-  <DialogContent dividers sx={{ backgroundColor: "#fafafa", px: 3, py: 2 }}>
-    <Box component="form" noValidate sx={{ mt: 1 }}>
-      <Grid container spacing={2}>
-        {/* --- VESSEL INFO --- */}
-        <Grid item xs={12}>
-          <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-            Vessel Information
-          </Typography>
+  <DialogContent dividers>
+    <Box component="form" noValidate>
+      {/* Vessel & Voyage Number */}
+      <Box mb={3}>
+        <Typography variant="h6" gutterBottom>Vessel & Voyage Number</Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Vessel Name"
+              name="vesselName"
+              value={form.vesselName}
+              onChange={handleChange}
+              fullWidth
+              disabled={!editMode}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Voyage Number"
+              name="voyageNumber"
+              value={form.voyageNumber}
+              onChange={handleChange}
+              fullWidth
+              disabled={!editMode}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            label="Vessel Name"
-            name="vesselName"
-            value={form.vesselName}
-            onChange={handleChange}
-            fullWidth
-            disabled={!editMode}
-            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            label="Voyage Number"
-            name="voyageNumber"
-            value={form.voyageNumber}
-            onChange={handleChange}
-            fullWidth
-            disabled={!editMode}
-            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
-          />
-        </Grid>
+      </Box>
 
-        {/* --- DEPARTURE INFO --- */}
-        <Grid item xs={12} mt={2}>
-          <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-            Departure
-          </Typography>
+      {/* Departure Items */}
+      <Box mb={3}>
+        <Typography variant="h6" gutterBottom>Departure Info</Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <DatePicker
+              label="Departure Date"
+              value={form.departureDate}
+              onChange={(date) => handleDateChange("departureDate", date)}
+              slotProps={{ textField: { fullWidth: true } }}
+              disabled={!editMode}
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <TextField
+              label="Departure Port"
+              name="departurePort"
+              value={form.departurePort}
+              onChange={handleChange}
+              fullWidth
+              disabled={!editMode}
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <TextField
+              label="Departure Country"
+              name="departureCountry"
+              value={form.departureCountry}
+              onChange={handleChange}
+              fullWidth
+              disabled={!editMode}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={6}>
-          <DatePicker
-            label="Departure Date"
-            value={form.departureDate}
-            onChange={(date) => handleDateChange("departureDate", date)}
-            slotProps={{
-              textField: {
-                fullWidth: true,
-                sx: { backgroundColor: "#fff", borderRadius: 1 },
-              },
-            }}
-            disabled={!editMode}
-          />
-        </Grid>
-        <Grid item xs={12} sm={3}>
-          <TextField
-            label="Departure Port"
-            name="departurePort"
-            value={form.departurePort}
-            onChange={handleChange}
-            fullWidth
-            disabled={!editMode}
-            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
-          />
-        </Grid>
-        <Grid item xs={12} sm={3}>
-          <TextField
-            label="Departure Country"
-            name="departureCountry"
-            value={form.departureCountry}
-            onChange={handleChange}
-            fullWidth
-            disabled={!editMode}
-            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
-          />
-        </Grid>
+      </Box>
 
-        {/* --- ARRIVAL INFO --- */}
-        <Grid item xs={12} mt={2}>
-          <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-            Arrival
-          </Typography>
+      {/* Arrival Items */}
+      <Box mb={3}>
+        <Typography variant="h6" gutterBottom>Arrival Info</Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <DatePicker
+              label="Arrival Date"
+              value={form.arrivalDate}
+              onChange={(date) => handleDateChange("arrivalDate", date)}
+              slotProps={{ textField: { fullWidth: true } }}
+              disabled={!editMode}
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <TextField
+              label="Arrival Port"
+              name="arrivalPort"
+              value={form.arrivalPort}
+              onChange={handleChange}
+              fullWidth
+              disabled={!editMode}
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <TextField
+              label="Arrival Country"
+              name="arrivalCountry"
+              value={form.arrivalCountry}
+              onChange={handleChange}
+              fullWidth
+              disabled={!editMode}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={6}>
-          <DatePicker
-            label="Arrival Date"
-            value={form.arrivalDate}
-            onChange={(date) => handleDateChange("arrivalDate", date)}
-            slotProps={{
-              textField: {
-                fullWidth: true,
-                sx: { backgroundColor: "#fff", borderRadius: 1 },
-              },
-            }}
-            disabled={!editMode}
-          />
-        </Grid>
-        <Grid item xs={12} sm={3}>
-          <TextField
-            label="Arrival Port"
-            name="arrivalPort"
-            value={form.arrivalPort}
-            onChange={handleChange}
-            fullWidth
-            disabled={!editMode}
-            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
-          />
-        </Grid>
-        <Grid item xs={12} sm={3}>
-          <TextField
-            label="Arrival Country"
-            name="arrivalCountry"
-            value={form.arrivalCountry}
-            onChange={handleChange}
-            fullWidth
-            disabled={!editMode}
-            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
-          />
-        </Grid>
+      </Box>
 
-        {/* --- CARGO INFO --- */}
-        <Grid item xs={12} mt={2}>
-          <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-            Cargo
-          </Typography>
+      {/* Cargo Items */}
+      <Box mb={3}>
+        <Typography variant="h6" gutterBottom>Cargo Info</Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              label="Cargo Type"
+              name="cargo.type"
+              value={form.cargo.type}
+              onChange={handleChange}
+              fullWidth
+              disabled={!editMode}
+            />
+          </Grid>
+          <Grid item xs={12} sm={2}>
+            <TextField
+              label="Unit"
+              name="cargo.quantityUnit"
+              value={form.cargo.quantityUnit}
+              onChange={handleChange}
+              fullWidth
+              disabled={!editMode}
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <TextField
+              label="Total"
+              name="cargo.total"
+              value={form.cargo.total}
+              onChange={handleChange}
+              fullWidth
+              disabled={!editMode}
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <TextField
+              label="Rate (USD)"
+              name="cargo.rateUSD"
+              value={form.cargo.rateUSD}
+              onChange={handleChange}
+              fullWidth
+              disabled={!editMode}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={4}>
-          <TextField
-            label="Cargo Type"
-            name="cargo.type"
-            value={form.cargo.type}
-            onChange={handleChange}
-            fullWidth
-            disabled={!editMode}
-            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
-          />
-        </Grid>
-        <Grid item xs={12} sm={2}>
-          <TextField
-            label="Unit"
-            name="cargo.quantityUnit"
-            value={form.cargo.quantityUnit}
-            onChange={handleChange}
-            fullWidth
-            disabled={!editMode}
-            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
-          />
-        </Grid>
-        <Grid item xs={12} sm={3}>
-          <TextField
-            label="Total"
-            name="cargo.total"
-            value={form.cargo.total}
-            onChange={handleChange}
-            fullWidth
-            disabled={!editMode}
-            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
-          />
-        </Grid>
-        <Grid item xs={12} sm={3}>
-          <TextField
-            label="Rate (USD)"
-            name="cargo.rateUSD"
-            value={form.cargo.rateUSD}
-            onChange={handleChange}
-            fullWidth
-            disabled={!editMode}
-            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
-          />
-        </Grid>
+      </Box>
 
-        {/* --- AGENT / CONSIGNEE --- */}
-        <Grid item xs={12} mt={2}>
-          <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-            Agent & Consignee
-          </Typography>
+      {/* Agent and Consignee */}
+      <Box mb={3}>
+        <Typography variant="h6" gutterBottom>Agent & Consignee</Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Agent"
+              name="agent"
+              value={form.agent}
+              onChange={handleChange}
+              fullWidth
+              disabled={!editMode}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Consignee"
+              name="consignee"
+              value={form.consignee}
+              onChange={handleChange}
+              fullWidth
+              disabled={!editMode}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            label="Agent"
-            name="agent"
-            value={form.agent}
-            onChange={handleChange}
-            fullWidth
-            disabled={!editMode}
-            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            label="Consignee"
-            name="consignee"
-            value={form.consignee}
-            onChange={handleChange}
-            fullWidth
-            disabled={!editMode}
-            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
-          />
-        </Grid>
+      </Box>
 
-        {/* --- REMARKS --- */}
-        <Grid item xs={12}>
-          <TextField
-            label="Remarks"
-            name="remarks"
-            value={form.remarks}
-            onChange={handleChange}
-            multiline
-            rows={2}
-            fullWidth
-            disabled={!editMode}
-            sx={{ backgroundColor: "#fff", borderRadius: 1 }}
-          />
-        </Grid>
-      </Grid>
+      {/* Remarks */}
+      <Box mb={3}>
+        <Typography variant="h6" gutterBottom>Remarks</Typography>
+        <TextField
+          label="Remarks"
+          name="remarks"
+          value={form.remarks}
+          onChange={handleChange}
+          multiline
+          rows={2}
+          fullWidth
+          disabled={!editMode}
+        />
+      </Box>
     </Box>
   </DialogContent>
 
-  <DialogActions
-    sx={{
-      px: 3,
-      py: 2,
-      backgroundColor: "#f5f5f5",
-      borderTop: "1px solid #ddd",
-    }}
-  >
+  <DialogActions>
     {editMode ? (
       <>
-        <Button
-          onClick={closeModal}
-          variant="outlined"
-          color="secondary"
-          sx={{ fontWeight: 500 }}
-        >
+        <Button onClick={closeModal} color="secondary">
           Cancel
         </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          color="primary"
-          sx={{ fontWeight: 600 }}
-        >
+        <Button onClick={handleSubmit} variant="contained">
           Save
         </Button>
       </>
@@ -671,13 +616,13 @@ function App() {
         onClick={() => setEditMode(true)}
         variant="contained"
         startIcon={<EditIcon />}
-        sx={{ fontWeight: 600 }}
       >
         Edit
       </Button>
     )}
   </DialogActions>
 </Dialog>
+
 
       </Box>
     </LocalizationProvider>
