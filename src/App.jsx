@@ -17,11 +17,10 @@ import {
   Paper,
   Card,
   CardContent,
+  Alert,
+  Stack,
 } from "@mui/material";
-import {
-  DatePicker,
-  LocalizationProvider,
-} from "@mui/x-date-pickers";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import EditIcon from "@mui/icons-material/Edit";
@@ -50,19 +49,97 @@ const initialForm = {
 };
 
 function App() {
+  // Auth state
+  const [user, setUser] = useState(null);
+
+  // Register/Login form states
+  const [authMode, setAuthMode] = useState("login"); // or "register"
+  const [authForm, setAuthForm] = useState({ username: "", email: "", password: "" });
+  const [authError, setAuthError] = useState("");
+  const [authMessage, setAuthMessage] = useState("");
+
+  // Voyage states
   const [voyages, setVoyages] = useState([]);
   const [selectedVoyage, setSelectedVoyage] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState(initialForm);
 
+  // On mount: check token and load user
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+    if (token && storedUser) {
+      setUser(JSON.parse(storedUser));
+      fetchVoyages();
+    }
+  }, []);
+
+  // Fetch voyages only if logged in
   const fetchVoyages = async () => {
-    const res = await axios.get(`${API_BASE}/api/voyages`);
-    setVoyages(res.data);
+    try {
+      const res = await axios.get(`${API_BASE}/api/voyages`);
+      setVoyages(res.data);
+    } catch {
+      // ignore or handle fetch errors
+    }
   };
 
-  useEffect(() => {
-    fetchVoyages();
-  }, []);
+  // Auth form input handler
+  const handleAuthChange = (e) => {
+    setAuthForm({ ...authForm, [e.target.name]: e.target.value });
+    setAuthError("");
+    setAuthMessage("");
+  };
+
+  // Register handler
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post(`${API_BASE}/api/auth/register`, {
+        username: authForm.username,
+        email: authForm.email,
+        password: authForm.password,
+      });
+      setAuthMessage(res.data.message || "Registered successfully! Please login.");
+      setAuthError("");
+      setAuthForm({ username: "", email: "", password: "" });
+      setAuthMode("login");
+    } catch (err) {
+      setAuthError(err.response?.data?.error || "Registration failed");
+      setAuthMessage("");
+    }
+  };
+
+  // Login handler
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post(`${API_BASE}/api/auth/login`, {
+        email: authForm.email,
+        password: authForm.password,
+      });
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      setUser(res.data.user);
+      setAuthError("");
+      setAuthMessage("");
+      setAuthForm({ username: "", email: "", password: "" });
+      fetchVoyages();
+    } catch (err) {
+      setAuthError(err.response?.data?.error || "Login failed");
+      setAuthMessage("");
+    }
+  };
+
+  // Logout handler
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    setVoyages([]);
+  };
+
+  // Voyage form handlers
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -94,15 +171,19 @@ function App() {
       departureDate: form.departureDate ? dayjs(form.departureDate).toISOString() : null,
       arrivalDate: form.arrivalDate ? dayjs(form.arrivalDate).toISOString() : null,
     };
-    if (selectedVoyage && selectedVoyage._id) {
-      await axios.put(`${API_BASE}/api/voyages/${selectedVoyage._id}`, payload);
-    } else {
-      await axios.post(`${API_BASE}/api/voyages`, payload);
+    try {
+      if (selectedVoyage && selectedVoyage._id) {
+        await axios.put(`${API_BASE}/api/voyages/${selectedVoyage._id}`, payload);
+      } else {
+        await axios.post(`${API_BASE}/api/voyages`, payload);
+      }
+      setEditMode(false);
+      setSelectedVoyage(null);
+      setForm(initialForm);
+      fetchVoyages();
+    } catch (error) {
+      alert("Error saving voyage: " + error.message);
     }
-    setEditMode(false);
-    setSelectedVoyage(null);
-    setForm(initialForm);
-    fetchVoyages();
   };
 
   const openModal = (voyage) => {
@@ -141,19 +222,159 @@ function App() {
     setForm(initialForm);
   };
 
+  // JSX for auth forms
+  const renderAuthForm = () => {
+    if (authMode === "register") {
+      return (
+        <Box sx={{ maxWidth: 400, mx: "auto", mt: 4 }}>
+          <Typography variant="h5" mb={2}>
+            Register
+          </Typography>
+          <Box component="form" onSubmit={handleRegister} noValidate>
+            <Stack spacing={2}>
+              <TextField
+                label="Username"
+                name="username"
+                value={authForm.username}
+                onChange={handleAuthChange}
+                required
+              />
+              <TextField
+                label="Email"
+                name="email"
+                type="email"
+                value={authForm.email}
+                onChange={handleAuthChange}
+                required
+              />
+              <TextField
+                label="Password"
+                name="password"
+                type="password"
+                value={authForm.password}
+                onChange={handleAuthChange}
+                required
+              />
+              <Button type="submit" variant="contained">
+                Register
+              </Button>
+              {authError && <Alert severity="error">{authError}</Alert>}
+              {authMessage && <Alert severity="success">{authMessage}</Alert>}
+              <Button
+                color="primary"
+                onClick={() => {
+                  setAuthMode("login");
+                  setAuthError("");
+                  setAuthMessage("");
+                  setAuthForm({ username: "", email: "", password: "" });
+                }}
+              >
+                Already have an account? Login
+              </Button>
+            </Stack>
+          </Box>
+        </Box>
+      );
+    } else {
+      // login mode
+      return (
+        <Box sx={{ maxWidth: 400, mx: "auto", mt: 4 }}>
+          <Typography variant="h5" mb={2}>
+            Login
+          </Typography>
+          <Box component="form" onSubmit={handleLogin} noValidate>
+            <Stack spacing={2}>
+              <TextField
+                label="Email"
+                name="email"
+                type="email"
+                value={authForm.email}
+                onChange={handleAuthChange}
+                required
+              />
+              <TextField
+                label="Password"
+                name="password"
+                type="password"
+                value={authForm.password}
+                onChange={handleAuthChange}
+                required
+              />
+              <Button type="submit" variant="contained">
+                Login
+              </Button>
+              {authError && <Alert severity="error">{authError}</Alert>}
+              <Button
+                color="primary"
+                onClick={() => {
+                  setAuthMode("register");
+                  setAuthError("");
+                  setAuthMessage("");
+                  setAuthForm({ username: "", email: "", password: "" });
+                }}
+              >
+                Don't have an account? Register
+              </Button>
+            </Stack>
+          </Box>
+        </Box>
+      );
+    }
+  };
+
+  if (!user) {
+    // Not logged in — show auth forms
+    return renderAuthForm();
+  }
+
+  // Logged in — show voyages UI with logout button
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ p: 2, maxWidth: 900, mx: "auto" }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-          <Typography variant="h4" color="primary">Voyages</Typography>
-          <Button variant="contained" startIcon={<AddCircleIcon />} onClick={openAddModal}>
-            Add Voyage
-          </Button>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
+          <Typography variant="h4" color="primary">
+            Voyages
+          </Typography>
+          <Box>
+            <Button
+              onClick={handleLogout}
+              sx={{ mr: 2 }}
+              color="secondary"
+              variant="outlined"
+            >
+              Logout
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<AddCircleIcon />}
+              onClick={openAddModal}
+            >
+              Add Voyage
+            </Button>
+          </Box>
         </Box>
 
+        {/* Voyages list */}
         <List>
           {voyages.map((v) => (
-            <Paper key={v._id} elevation={2} sx={{ mb: 1, cursor: "pointer", p: 2, "&:hover": { bgcolor: "action.hover" } }} onClick={() => openModal(v)}>
+            <Paper
+              key={v._id}
+              elevation={2}
+              sx={{
+                mb: 1,
+                cursor: "pointer",
+                p: 2,
+                "&:hover": { bgcolor: "action.hover" },
+              }}
+              onClick={() => openModal(v)}
+            >
               <ListItemText
                 primary={<Typography variant="h6">{v.vesselName}</Typography>}
                 secondary={`Voyage #${v.voyageNumber}`}
@@ -162,16 +383,31 @@ function App() {
           ))}
         </List>
 
+        {/* Voyage details dialog */}
         <Dialog open={!!selectedVoyage} onClose={closeModal} maxWidth="md" fullWidth>
           <DialogTitle>
-            {editMode ? (selectedVoyage._id ? "Edit Voyage" : "Add Voyage") : "Voyage Details"}
-            <IconButton onClick={closeModal} sx={{ position: "absolute", right: 8, top: 8 }}>
+            {editMode
+              ? selectedVoyage._id
+                ? "Edit Voyage"
+                : "Add Voyage"
+              : "Voyage Details"}
+            <IconButton
+              onClick={closeModal}
+              sx={{ position: "absolute", right: 8, top: 8 }}
+            >
               <CloseIcon />
             </IconButton>
           </DialogTitle>
           <DialogContent dividers>
             {editMode ? (
-              <Box component="form" onSubmit={handleSubmit} noValidate autoComplete="off" sx={{ mt: 1 }}>
+              <Box
+                component="form"
+                onSubmit={handleSubmit}
+                noValidate
+                autoComplete="off"
+                sx={{ mt: 1 }}
+              >
+                {/* FULL Voyage Edit Form JSX */}
                 <Grid container spacing={2}>
 
                   {/* Voyage Info */}
@@ -374,8 +610,7 @@ function App() {
                         <TextField
                           fullWidth
                           multiline
-                          minRows={3}
-                          maxRows={8}
+                          minRows={2}
                           name="remarks"
                           label="Remarks"
                           value={form.remarks}
@@ -389,133 +624,98 @@ function App() {
               </Box>
             ) : (
               <>
+                {/* FULL Voyage Details JSX */}
                 <Grid container spacing={2}>
-
-                  {/* Voyage Info */}
-                  <Grid item xs={12}>
-                    <Card variant="outlined">
-                      <CardContent>
-                        <Typography variant="h6" gutterBottom>Voyage Info</Typography>
-                        <Grid container spacing={2}>
-                          <Grid item xs={12} sm={6}>
-                            <Typography><strong>Voyage Number:</strong> {form.voyageNumber}</Typography>
-                          </Grid>
-                          <Grid item xs={12} sm={6}>
-                            <Typography><strong>Vessel Name:</strong> {form.vesselName}</Typography>
-                          </Grid>
-                        </Grid>
-                      </CardContent>
-                    </Card>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="textSecondary">Voyage Number</Typography>
+                    <Typography variant="body1">{selectedVoyage?.voyageNumber || "-"}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="textSecondary">Vessel Name</Typography>
+                    <Typography variant="body1">{selectedVoyage?.vesselName || "-"}</Typography>
                   </Grid>
 
-                  {/* Departure Details */}
-                  <Grid item xs={12}>
-                    <Card variant="outlined">
-                      <CardContent>
-                        <Typography variant="h6" gutterBottom>Departure Details</Typography>
-                        <Grid container spacing={2}>
-                          <Grid item xs={12} sm={4}>
-                            <Typography><strong>Departure Port:</strong> {form.departurePort}</Typography>
-                          </Grid>
-                          <Grid item xs={12} sm={4}>
-                            <Typography><strong>Departure Country:</strong> {form.departureCountry}</Typography>
-                          </Grid>
-                          <Grid item xs={12} sm={4}>
-                            <Typography><strong>Departure Date:</strong> {form.departureDate ? form.departureDate.format("YYYY-MM-DD") : ""}</Typography>
-                          </Grid>
-                        </Grid>
-                      </CardContent>
-                    </Card>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="textSecondary">Departure Port</Typography>
+                    <Typography variant="body1">{selectedVoyage?.departurePort || "-"}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="textSecondary">Departure Country</Typography>
+                    <Typography variant="body1">{selectedVoyage?.departureCountry || "-"}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="textSecondary">Departure Date</Typography>
+                    <Typography variant="body1">{selectedVoyage?.departureDate ? dayjs(selectedVoyage.departureDate).format("DD MMM YYYY") : "-"}</Typography>
                   </Grid>
 
-                  {/* Arrival Details */}
-                  <Grid item xs={12}>
-                    <Card variant="outlined">
-                      <CardContent>
-                        <Typography variant="h6" gutterBottom>Arrival Details</Typography>
-                        <Grid container spacing={2}>
-                          <Grid item xs={12} sm={4}>
-                            <Typography><strong>Arrival Port:</strong> {form.arrivalPort}</Typography>
-                          </Grid>
-                          <Grid item xs={12} sm={4}>
-                            <Typography><strong>Arrival Country:</strong> {form.arrivalCountry}</Typography>
-                          </Grid>
-                          <Grid item xs={12} sm={4}>
-                            <Typography><strong>Arrival Date:</strong> {form.arrivalDate ? form.arrivalDate.format("YYYY-MM-DD") : ""}</Typography>
-                          </Grid>
-                        </Grid>
-                      </CardContent>
-                    </Card>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="textSecondary">Arrival Port</Typography>
+                    <Typography variant="body1">{selectedVoyage?.arrivalPort || "-"}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="textSecondary">Arrival Country</Typography>
+                    <Typography variant="body1">{selectedVoyage?.arrivalCountry || "-"}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="textSecondary">Arrival Date</Typography>
+                    <Typography variant="body1">{selectedVoyage?.arrivalDate ? dayjs(selectedVoyage.arrivalDate).format("DD MMM YYYY") : "-"}</Typography>
                   </Grid>
 
-                  {/* Cargo Details */}
-                  <Grid item xs={12}>
-                    <Card variant="outlined">
-                      <CardContent>
-                        <Typography variant="h6" gutterBottom>Cargo Details</Typography>
-                        <Grid container spacing={2}>
-                          <Grid item xs={6} sm={3}>
-                            <Typography><strong>Type:</strong> {form.cargo.type}</Typography>
-                          </Grid>
-                          <Grid item xs={6} sm={3}>
-                            <Typography><strong>Unit:</strong> {form.cargo.quantityUnit}</Typography>
-                          </Grid>
-                          <Grid item xs={6} sm={3}>
-                            <Typography><strong>Total:</strong> {form.cargo.total}</Typography>
-                          </Grid>
-                          <Grid item xs={6} sm={3}>
-                            <Typography><strong>Rate (USD):</strong> {form.cargo.rateUSD}</Typography>
-                          </Grid>
-                        </Grid>
-                      </CardContent>
-                    </Card>
+                  <Grid item xs={12} sm={3}>
+                    <Typography variant="subtitle2" color="textSecondary">Cargo Type</Typography>
+                    <Typography variant="body1">{selectedVoyage?.cargo?.type || "-"}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Typography variant="subtitle2" color="textSecondary">Quantity Unit</Typography>
+                    <Typography variant="body1">{selectedVoyage?.cargo?.quantityUnit || "-"}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Typography variant="subtitle2" color="textSecondary">Cargo Total</Typography>
+                    <Typography variant="body1">{selectedVoyage?.cargo?.total || "-"}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <Typography variant="subtitle2" color="textSecondary">Rate (USD)</Typography>
+                    <Typography variant="body1">{selectedVoyage?.cargo?.rateUSD || "-"}</Typography>
                   </Grid>
 
-                  {/* Agent & Consignee */}
-                  <Grid item xs={12}>
-                    <Card variant="outlined">
-                      <CardContent>
-                        <Typography variant="h6" gutterBottom>Agent & Consignee</Typography>
-                        <Grid container spacing={2}>
-                          <Grid item xs={6}>
-                            <Typography><strong>Agent:</strong> {form.agent}</Typography>
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Typography><strong>Consignee:</strong> {form.consignee}</Typography>
-                          </Grid>
-                        </Grid>
-                      </CardContent>
-                    </Card>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="textSecondary">Agent</Typography>
+                    <Typography variant="body1">{selectedVoyage?.agent || "-"}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="textSecondary">Consignee</Typography>
+                    <Typography variant="body1">{selectedVoyage?.consignee || "-"}</Typography>
                   </Grid>
 
-                  {/* Remarks */}
                   <Grid item xs={12}>
-                    <Card variant="outlined">
-                      <CardContent>
-                        <Typography variant="h6" gutterBottom>Remarks</Typography>
-                        <Typography sx={{ whiteSpace: "pre-line" }}>{form.remarks}</Typography>
-                      </CardContent>
-                    </Card>
+                    <Typography variant="subtitle2" color="textSecondary">Remarks</Typography>
+                    <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
+                      {selectedVoyage?.remarks || "-"}
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <Button
+                      startIcon={<EditIcon />}
+                      onClick={() => setEditMode(true)}
+                      variant="contained"
+                    >
+                      Edit
+                    </Button>
                   </Grid>
                 </Grid>
-
-                <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
-                  <Button
-                    variant="contained"
-                    startIcon={<EditIcon />}
-                    onClick={() => setEditMode(true)}
-                  >
-                    Edit
-                  </Button>
-                </Box>
               </>
             )}
           </DialogContent>
 
           {editMode && (
             <DialogActions>
-              <Button onClick={closeModal} color="inherit">Cancel</Button>
-              <Button onClick={handleSubmit} variant="contained" type="submit">Save</Button>
+              <Button onClick={closeModal} color="inherit">
+                Cancel
+              </Button>
+              <Button onClick={handleSubmit} variant="contained" type="submit">
+                Save
+              </Button>
             </DialogActions>
           )}
         </Dialog>
