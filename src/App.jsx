@@ -19,6 +19,10 @@ import {
   CardContent,
   Alert,
   Stack,
+  Select, 
+  MenuItem, 
+  InputLabel, 
+  FormControl
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -524,16 +528,6 @@ function App() {
               disabled={!editMode}
             />
           </Grid>
-          <Grid item xs={12} sm={2}>
-            <TextField
-              label="Unit"
-              name="cargo.quantityUnit"
-              value={form.cargo.quantityUnit}
-              onChange={handleChange}
-              fullWidth
-              disabled={!editMode}
-            />
-          </Grid>
           <Grid item xs={12} sm={3}>
             <TextField
               label="Total"
@@ -543,6 +537,21 @@ function App() {
               fullWidth
               disabled={!editMode}
             />
+          </Grid>
+          <Grid item xs={12} sm={2}>
+          <FormControl fullWidth disabled={!editMode}>
+            <InputLabel id="quantity-unit-label">Unit</InputLabel>
+            <Select
+              labelId="quantity-unit-label"
+              label="Unit"
+              name="cargo.quantityUnit"
+              value={form.cargo.quantityUnit}
+              onChange={handleChange}
+            >
+              <MenuItem value="MT">MT</MenuItem>
+              <MenuItem value="KG">KG</MenuItem>
+            </Select>
+          </FormControl>
           </Grid>
           <Grid item xs={12} sm={3}>
             <TextField
