@@ -17,8 +17,8 @@ export default function RegisterForm() {
     e.preventDefault();
     try {
       const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/register`, form);
-      setMessage(res.data.message);
-      setForm({ username: "", email: "", password: "" }); // reset form
+      setMessage(res.data.message || "Registered successfully! Please login.");
+      setForm({ username: "", email: "", password: "" });
     } catch (err) {
       setError(err.response?.data?.error || "Registration failed");
     }
@@ -26,22 +26,9 @@ export default function RegisterForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Stack spacing={2} sx={{ maxWidth: 400, margin: "auto" }}>
-        <TextField
-          label="Username"
-          name="username"
-          value={form.username}
-          onChange={handleChange}
-          required
-        />
-        <TextField
-          label="Email"
-          name="email"
-          type="email"
-          value={form.email}
-          onChange={handleChange}
-          required
-        />
+      <Stack spacing={2} sx={{ maxWidth: 400, margin: "auto", mt: 4 }}>
+        <TextField label="Username" name="username" value={form.username} onChange={handleChange} required />
+        <TextField label="Email" name="email" type="email" value={form.email} onChange={handleChange} required />
         <TextField
           label="Password"
           name="password"
