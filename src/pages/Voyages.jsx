@@ -13,6 +13,7 @@ import {
   Toolbar,
   Container,
   Avatar,
+  CircularProgress, // Import spinner component
 } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 
@@ -45,16 +46,22 @@ export default function Voyages({ user, onLogout }) {
   const [editMode, setEditMode] = useState(false);
   const [viewMode, setViewMode] = useState(false);
 
+  // New state to track loading status
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     fetchVoyages();
   }, []);
 
   const fetchVoyages = async () => {
+    setLoading(true); // Start loading spinner
     try {
       const res = await axios.get(`${API_BASE}/api/voyages`);
       setVoyages(res.data);
     } catch (err) {
       console.error("Error fetching voyages", err);
+    } finally {
+      setLoading(false); // Stop loading spinner
     }
   };
 
@@ -186,7 +193,7 @@ export default function Voyages({ user, onLogout }) {
         >
           <Typography variant="h5">Voyages</Typography>
 
-          {/* Add Voyage button moved here */}
+          {/* Add Voyage button */}
           <Button
             onClick={handleAddVoyage}
             variant="contained"
@@ -197,9 +204,17 @@ export default function Voyages({ user, onLogout }) {
           </Button>
         </Box>
 
-        <Paper variant="outlined" sx={{ p: 2 }}>
-          <VoyageList voyages={voyages} onSelect={handleViewVoyage} />
-        </Paper>
+        {/* Show loading spinner while fetching data */}
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          // Show voyage list inside a Paper
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <VoyageList voyages={voyages} onSelect={handleViewVoyage} />
+          </Paper>
+        )}
       </Container>
 
       {/* Details modal */}
