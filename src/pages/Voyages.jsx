@@ -1,10 +1,15 @@
-// src/pages/Voyages.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import dayjs from "dayjs";
 import VoyageList from "../components/VoyageList";
 import VoyageForm from "../components/VoyageForm";
-import { Box, Button, Typography, Paper } from "@mui/material";
+import VoyageDetails from "../components/VoyageDetails";
+import {
+  Box,
+  Button,
+  Typography,
+  Paper,
+} from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
@@ -32,8 +37,9 @@ const initialForm = {
 export default function Voyages({ user, onLogout }) {
   const [voyages, setVoyages] = useState([]);
   const [selectedVoyage, setSelectedVoyage] = useState(null);
-  const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState(initialForm);
+  const [editMode, setEditMode] = useState(false);
+  const [viewMode, setViewMode] = useState(false);
 
   useEffect(() => {
     fetchVoyages();
@@ -48,39 +54,47 @@ export default function Voyages({ user, onLogout }) {
     }
   };
 
-  const openModal = (voyage) => {
-    setSelectedVoyage(voyage);
-    setEditMode(false);
-    setForm({
-      vesselName: voyage.vesselName || "",
-      voyageNumber: voyage.voyageNumber || "",
-      departureDate: voyage.departureDate ? dayjs(voyage.departureDate) : null,
-      departurePort: voyage.departurePort || "",
-      departureCountry: voyage.departureCountry || "",
-      arrivalDate: voyage.arrivalDate ? dayjs(voyage.arrivalDate) : null,
-      arrivalPort: voyage.arrivalPort || "",
-      arrivalCountry: voyage.arrivalCountry || "",
-      cargo: {
-        type: voyage.cargo?.type || "",
-        quantityUnit: voyage.cargo?.quantityUnit || "MT",
-        total: voyage.cargo?.total || "",
-        rateUSD: voyage.cargo?.rateUSD || "",
-      },
-      agent: voyage.agent || "",
-      consignee: voyage.consignee || "",
-      remarks: voyage.remarks || "",
-    });
-  };
+  const mapToForm = (voyage) => ({
+    vesselName: voyage.vesselName || "",
+    voyageNumber: voyage.voyageNumber || "",
+    departureDate: voyage.departureDate ? dayjs(voyage.departureDate) : null,
+    departurePort: voyage.departurePort || "",
+    departureCountry: voyage.departureCountry || "",
+    arrivalDate: voyage.arrivalDate ? dayjs(voyage.arrivalDate) : null,
+    arrivalPort: voyage.arrivalPort || "",
+    arrivalCountry: voyage.arrivalCountry || "",
+    cargo: {
+      type: voyage.cargo?.type || "",
+      quantityUnit: voyage.cargo?.quantityUnit || "MT",
+      total: voyage.cargo?.total || "",
+      rateUSD: voyage.cargo?.rateUSD || "",
+    },
+    agent: voyage.agent || "",
+    consignee: voyage.consignee || "",
+    remarks: voyage.remarks || "",
+  });
 
-  const openAddModal = () => {
-    setSelectedVoyage({});
-    setEditMode(true);
-    setForm(initialForm);
-  };
-
-  const closeModal = () => {
+  const handleAddVoyage = () => {
     setSelectedVoyage(null);
+    setForm(initialForm);
+    setEditMode(true);
+  };
+
+  const handleViewVoyage = (voyage) => {
+    setSelectedVoyage(voyage);
+    setForm(mapToForm(voyage));
+    setViewMode(true);
+  };
+
+  const handleEditFromView = () => {
+    setViewMode(false);
+    setEditMode(true);
+  };
+
+  const handleCloseModals = () => {
     setEditMode(false);
+    setViewMode(false);
+    setSelectedVoyage(null);
     setForm(initialForm);
   };
 
@@ -120,9 +134,7 @@ export default function Voyages({ user, onLogout }) {
       } else {
         await axios.post(`${API_BASE}/api/voyages`, payload);
       }
-      setEditMode(false);
-      setSelectedVoyage(null);
-      setForm(initialForm);
+      handleCloseModals();
       fetchVoyages();
     } catch (error) {
       alert("Error saving voyage: " + error.message);
@@ -139,22 +151,29 @@ export default function Voyages({ user, onLogout }) {
           <Button onClick={onLogout} sx={{ mr: 2 }} color="secondary" variant="outlined">
             Logout
           </Button>
-          <Button onClick={openAddModal} variant="contained" color="primary" startIcon={<AddCircleIcon />}>
+          <Button onClick={handleAddVoyage} variant="contained" color="primary" startIcon={<AddCircleIcon />}>
             Add Voyage
           </Button>
         </Box>
       </Box>
 
       <Paper variant="outlined">
-        <VoyageList voyages={voyages} onSelect={openModal} />
+        <VoyageList voyages={voyages} onSelect={handleViewVoyage} />
       </Paper>
 
+      <VoyageDetails
+        open={viewMode}
+        selectedVoyage={selectedVoyage}
+        closeModal={handleCloseModals}
+        onEdit={handleEditFromView}
+      />
+
       <VoyageForm
-        open={Boolean(selectedVoyage)}
-        editMode={editMode}
+        open={editMode}
+        editMode={!!selectedVoyage}
         form={form}
         selectedVoyage={selectedVoyage}
-        onClose={closeModal}
+        onClose={handleCloseModals}
         onChange={handleChange}
         onDateChange={handleDateChange}
         onSubmit={handleSubmit}
