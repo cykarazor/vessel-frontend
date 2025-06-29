@@ -176,8 +176,8 @@ export default function Voyages({ user, onLogout }) {
 
       {/* ✍️ Show form modal */}
       <VoyageForm
-        open={editMode}
-        editMode={!!selectedVoyage}
+        open={editMode} // modal visible when editMode=true
+        isEditing={Boolean(selectedVoyage)} // true if editing existing, false if adding new
         form={form}
         selectedVoyage={selectedVoyage}
         onClose={handleCloseModals}
