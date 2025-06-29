@@ -1,19 +1,27 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import dayjs from "dayjs";
+
+// Components
 import VoyageList from "../components/VoyageList";
 import VoyageForm from "../components/VoyageForm";
 import VoyageDetails from "../components/VoyageDetails";
+
+// MUI Imports
 import {
   Box,
   Button,
   Typography,
   Paper,
+  AppBar,
+  Toolbar,
+  Container,
 } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
+// 🔧 Default structure for a new voyage form
 const initialForm = {
   vesselName: "",
   voyageNumber: "",
@@ -38,13 +46,14 @@ export default function Voyages({ user, onLogout }) {
   const [voyages, setVoyages] = useState([]);
   const [selectedVoyage, setSelectedVoyage] = useState(null);
   const [form, setForm] = useState(initialForm);
-  const [editMode, setEditMode] = useState(false); // true if form modal is open
-  const [viewMode, setViewMode] = useState(false); // true if details modal is open
+  const [editMode, setEditMode] = useState(false);
+  const [viewMode, setViewMode] = useState(false);
 
   useEffect(() => {
     fetchVoyages();
   }, []);
 
+  // 🔄 Load voyages from backend
   const fetchVoyages = async () => {
     try {
       const res = await axios.get(`${API_BASE}/api/voyages`);
@@ -54,6 +63,7 @@ export default function Voyages({ user, onLogout }) {
     }
   };
 
+  // 📋 Map voyage data to form format
   const mapToForm = (voyage) => ({
     vesselName: voyage.vesselName || "",
     voyageNumber: voyage.voyageNumber || "",
@@ -74,31 +84,36 @@ export default function Voyages({ user, onLogout }) {
     remarks: voyage.remarks || "",
   });
 
+  // ➕ Create new voyage
   const handleAddVoyage = () => {
     setSelectedVoyage(null);
     setForm(initialForm);
-    setEditMode(true); // 🚀 open form modal
+    setEditMode(true);
   };
 
+  // 👁 View voyage details
   const handleViewVoyage = (voyage) => {
     setSelectedVoyage(voyage);
     setForm(mapToForm(voyage));
-    setViewMode(true); // 👁 open detail modal
+    setViewMode(true);
   };
 
+  // ✏️ Edit from inside details modal
   const handleEditFromView = () => {
     setViewMode(false);
-    setForm(mapToForm(selectedVoyage)); // 💾 load form with existing data
-    setEditMode(true); // 🛠 switch to edit mode
+    setForm(mapToForm(selectedVoyage));
+    setEditMode(true);
   };
 
+  // ❌ Close modals
   const handleCloseModals = () => {
     setEditMode(false);
     setViewMode(false);
     setSelectedVoyage(null);
-    setForm(initialForm); // 🧹 clear form
+    setForm(initialForm);
   };
 
+  // 🧠 Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name.startsWith("cargo.")) {
@@ -115,6 +130,7 @@ export default function Voyages({ user, onLogout }) {
     }
   };
 
+  // 📅 Handle date changes
   const handleDateChange = (name, date) => {
     setForm((prev) => ({
       ...prev,
@@ -122,9 +138,9 @@ export default function Voyages({ user, onLogout }) {
     }));
   };
 
+  // 💾 Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const payload = {
       ...form,
       departureDate: form.departureDate ? dayjs(form.departureDate).toISOString() : null,
@@ -133,10 +149,8 @@ export default function Voyages({ user, onLogout }) {
 
     try {
       if (selectedVoyage && selectedVoyage._id) {
-        // 📝 Editing
         await axios.put(`${API_BASE}/api/voyages/${selectedVoyage._id}`, payload);
       } else {
-        // ➕ Creating
         await axios.post(`${API_BASE}/api/voyages`, payload);
       }
       handleCloseModals();
@@ -147,26 +161,34 @@ export default function Voyages({ user, onLogout }) {
   };
 
   return (
-    <Box sx={{ p: 2, maxWidth: 900, mx: "auto" }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-        <Typography variant="h4" color="primary">
-          Voyages
-        </Typography>
-        <Box>
-          <Button onClick={onLogout} sx={{ mr: 2 }} color="secondary" variant="outlined">
-            Logout
-          </Button>
-          <Button onClick={handleAddVoyage} variant="contained" color="primary" startIcon={<AddCircleIcon />}>
-            Add Voyage
-          </Button>
-        </Box>
-      </Box>
+    <>
+      {/* 🧭 Header using AppBar */}
+      <AppBar position="sticky">
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Typography variant="h6">Vessel Voyage Tracker</Typography>
+          <Box>
+            <Button color="inherit" onClick={onLogout} sx={{ mr: 2 }}>
+              Logout
+            </Button>
+            <Button
+              onClick={handleAddVoyage}
+              color="inherit"
+              startIcon={<AddCircleIcon />}
+            >
+              Add Voyage
+            </Button>
+          </Box>
+        </Toolbar>
+      </AppBar>
 
-      <Paper variant="outlined">
-        <VoyageList voyages={voyages} onSelect={handleViewVoyage} />
-      </Paper>
+      {/* 📦 Main Content */}
+      <Container sx={{ mt: 4, mb: 8 }}>
+        <Paper variant="outlined" sx={{ p: 2 }}>
+          <VoyageList voyages={voyages} onSelect={handleViewVoyage} />
+        </Paper>
+      </Container>
 
-      {/* 👁 Show details modal */}
+      {/* 🔍 Details Modal */}
       <VoyageDetails
         open={viewMode}
         selectedVoyage={selectedVoyage}
@@ -174,10 +196,10 @@ export default function Voyages({ user, onLogout }) {
         onEdit={handleEditFromView}
       />
 
-      {/* ✍️ Show form modal */}
+      {/* 📝 Form Modal */}
       <VoyageForm
-        open={editMode} // modal visible when editMode=true
-        isEditing={Boolean(selectedVoyage)} // true if editing existing, false if adding new
+        open={editMode}
+        isEditing={Boolean(selectedVoyage)}
         form={form}
         selectedVoyage={selectedVoyage}
         onClose={handleCloseModals}
@@ -185,6 +207,21 @@ export default function Voyages({ user, onLogout }) {
         onDateChange={handleDateChange}
         onSubmit={handleSubmit}
       />
-    </Box>
+
+      {/* 📌 Footer */}
+      <Box
+        component="footer"
+        sx={{
+          py: 2,
+          textAlign: "center",
+          backgroundColor: "#f0f0f0",
+          mt: "auto",
+        }}
+      >
+        <Typography variant="body2" color="text.secondary">
+          © {new Date().getFullYear()} Atlantic Star Ltd. All rights reserved.
+        </Typography>
+      </Box>
+    </>
   );
 }
