@@ -133,7 +133,6 @@ export default function Voyages({ user, onLogout }) {
       departureDate: form.departureDate ? dayjs(form.departureDate).toISOString() : null,
       arrivalDate: form.arrivalDate ? dayjs(form.arrivalDate).toISOString() : null,
     };
-
     try {
       if (selectedVoyage && selectedVoyage._id) {
         await axios.put(`${API_BASE}/api/voyages/${selectedVoyage._id}`, payload);
@@ -149,51 +148,61 @@ export default function Voyages({ user, onLogout }) {
 
   return (
     <>
-      {/* Header with Logo and Username */}
+      {/* Header with Avatar and updated title */}
       <AppBar position="sticky" color="primary">
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            {/* Simple circle avatar as logo placeholder */}
-            <Avatar sx={{ bgcolor: "secondary.main", mr: 2 }}>
-              AS
+            {/* Avatar with ASL initials */}
+            <Avatar sx={{ bgcolor: "secondary.main", mr: 2, fontWeight: "bold" }}>
+              ASL
             </Avatar>
             <Typography variant="h6" component="div">
-              Atlantic Star Ltd.
+              Voyage Tracker
             </Typography>
           </Box>
 
+          {/* Username and logout button */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            {/* Show username */}
             <Typography sx={{ mr: 3 }}>
               Logged in as <strong>{user?.username || "Guest"}</strong>
             </Typography>
             <Button color="inherit" onClick={onLogout} sx={{ mr: 2 }}>
               Logout
             </Button>
-            <Button
-              onClick={handleAddVoyage}
-              color="inherit"
-              startIcon={<AddCircleIcon />}
-            >
-              Add Voyage
-            </Button>
           </Box>
         </Toolbar>
       </AppBar>
 
-      {/* Main Content */}
+      {/* Main container for content */}
       <Container sx={{ mt: 4, mb: 8 }}>
-        {/* Heading over voyage list */}
-        <Typography variant="h5" gutterBottom>
-          Voyages
-        </Typography>
+        {/* Voyages heading and Add Voyage button on the same line */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
+          <Typography variant="h5">Voyages</Typography>
+
+          {/* Add Voyage button moved here */}
+          <Button
+            onClick={handleAddVoyage}
+            variant="contained"
+            color="primary"
+            startIcon={<AddCircleIcon />}
+          >
+            Add Voyage
+          </Button>
+        </Box>
 
         <Paper variant="outlined" sx={{ p: 2 }}>
           <VoyageList voyages={voyages} onSelect={handleViewVoyage} />
         </Paper>
       </Container>
 
-      {/* Details Modal */}
+      {/* Details modal */}
       <VoyageDetails
         open={viewMode}
         selectedVoyage={selectedVoyage}
@@ -201,7 +210,7 @@ export default function Voyages({ user, onLogout }) {
         onEdit={handleEditFromView}
       />
 
-      {/* Form Modal */}
+      {/* Form modal */}
       <VoyageForm
         open={editMode}
         isEditing={Boolean(selectedVoyage)}
@@ -213,7 +222,7 @@ export default function Voyages({ user, onLogout }) {
         onSubmit={handleSubmit}
       />
 
-      {/* Footer */}
+      {/* Footer with updated company name */}
       <Box
         component="footer"
         sx={{
