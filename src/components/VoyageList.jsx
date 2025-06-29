@@ -14,8 +14,8 @@ export default function VoyageList({ voyages, onSelect }) {
             "&:hover": {
               backgroundColor: "#e0f7fa", // 💡 Hover color
             },
-            cursor: "pointer", // 👉 Pointer on hover
-            transition: "background-color 0.2s ease-in-out", // 🎨 Smooth transition
+            cursor: "pointer", // 👉 Pointer cursor
+            transition: "background-color 0.2s ease-in-out",
           }}
         >
           <ListItemText
@@ -26,8 +26,8 @@ export default function VoyageList({ voyages, onSelect }) {
             }
             secondary={
               voyage.departurePort && voyage.arrivalPort
-                ? `${voyage.departurePort} → ${voyage.arrivalPort}`
-                : null
+                ? `${voyage.departurePort} → ${voyage.arrivalPort} · Tap for full details` // ✅ Added instruction
+                : "Tap for full details"
             }
           />
         </ListItem>
