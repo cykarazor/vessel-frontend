@@ -21,17 +21,19 @@ import CloseIcon from "@mui/icons-material/Close";
 export default function VoyageForm({
   open,
   editMode,
-  form,
+  form = {},
   selectedVoyage,
   onClose,
   onChange,
   onDateChange,
   onSubmit,
 }) {
+  const cargo = form.cargo || {};
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ position: "relative" }}>
-        {selectedVoyage ? "Edit Voyage" : "Add Voyage"}
+        {editMode ? "Edit Voyage" : "Voyage Details"}
         <IconButton
           aria-label="close"
           onClick={onClose}
@@ -50,18 +52,20 @@ export default function VoyageForm({
               <TextField
                 label="Vessel Name"
                 name="vesselName"
-                value={form.vesselName}
+                value={form.vesselName || ""}
                 onChange={onChange}
                 fullWidth
+                disabled={!editMode}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
                 label="Voyage Number"
                 name="voyageNumber"
-                value={form.voyageNumber}
+                value={form.voyageNumber || ""}
                 onChange={onChange}
                 fullWidth
+                disabled={!editMode}
               />
             </Grid>
           </Grid>
@@ -72,27 +76,29 @@ export default function VoyageForm({
             <Grid item xs={12} sm={6}>
               <DatePicker
                 label="Departure Date"
-                value={form.departureDate}
+                value={form.departureDate || null}
                 onChange={(date) => onDateChange("departureDate", date)}
-                slotProps={{ textField: { fullWidth: true } }}
+                slotProps={{ textField: { fullWidth: true, disabled: !editMode } }}
               />
             </Grid>
             <Grid item xs={12} sm={3}>
               <TextField
                 label="Departure Port"
                 name="departurePort"
-                value={form.departurePort}
+                value={form.departurePort || ""}
                 onChange={onChange}
                 fullWidth
+                disabled={!editMode}
               />
             </Grid>
             <Grid item xs={12} sm={3}>
               <TextField
                 label="Departure Country"
                 name="departureCountry"
-                value={form.departureCountry}
+                value={form.departureCountry || ""}
                 onChange={onChange}
                 fullWidth
+                disabled={!editMode}
               />
             </Grid>
           </Grid>
@@ -103,27 +109,29 @@ export default function VoyageForm({
             <Grid item xs={12} sm={6}>
               <DatePicker
                 label="Arrival Date"
-                value={form.arrivalDate}
+                value={form.arrivalDate || null}
                 onChange={(date) => onDateChange("arrivalDate", date)}
-                slotProps={{ textField: { fullWidth: true } }}
+                slotProps={{ textField: { fullWidth: true, disabled: !editMode } }}
               />
             </Grid>
             <Grid item xs={12} sm={3}>
               <TextField
                 label="Arrival Port"
                 name="arrivalPort"
-                value={form.arrivalPort}
+                value={form.arrivalPort || ""}
                 onChange={onChange}
                 fullWidth
+                disabled={!editMode}
               />
             </Grid>
             <Grid item xs={12} sm={3}>
               <TextField
                 label="Arrival Country"
                 name="arrivalCountry"
-                value={form.arrivalCountry}
+                value={form.arrivalCountry || ""}
                 onChange={onChange}
                 fullWidth
+                disabled={!editMode}
               />
             </Grid>
           </Grid>
@@ -135,26 +143,28 @@ export default function VoyageForm({
               <TextField
                 label="Type"
                 name="cargo.type"
-                value={form.cargo.type}
+                value={cargo.type || ""}
                 onChange={onChange}
                 fullWidth
+                disabled={!editMode}
               />
             </Grid>
             <Grid item xs={12} sm={3}>
               <TextField
                 label="Total"
                 name="cargo.total"
-                value={form.cargo.total}
+                value={cargo.total || ""}
                 onChange={onChange}
                 fullWidth
+                disabled={!editMode}
               />
             </Grid>
             <Grid item xs={12} sm={2}>
-              <FormControl fullWidth>
+              <FormControl fullWidth disabled={!editMode}>
                 <InputLabel>Unit</InputLabel>
                 <Select
                   name="cargo.quantityUnit"
-                  value={form.cargo.quantityUnit}
+                  value={cargo.quantityUnit || "MT"}
                   onChange={onChange}
                   label="Unit"
                 >
@@ -167,9 +177,10 @@ export default function VoyageForm({
               <TextField
                 label="Rate USD"
                 name="cargo.rateUSD"
-                value={form.cargo.rateUSD}
+                value={cargo.rateUSD || ""}
                 onChange={onChange}
                 fullWidth
+                disabled={!editMode}
               />
             </Grid>
           </Grid>
@@ -181,18 +192,20 @@ export default function VoyageForm({
               <TextField
                 label="Agent"
                 name="agent"
-                value={form.agent}
+                value={form.agent || ""}
                 onChange={onChange}
                 fullWidth
+                disabled={!editMode}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
                 label="Consignee"
                 name="consignee"
-                value={form.consignee}
+                value={form.consignee || ""}
                 onChange={onChange}
                 fullWidth
+                disabled={!editMode}
               />
             </Grid>
           </Grid>
@@ -202,18 +215,19 @@ export default function VoyageForm({
           <TextField
             label="Remarks"
             name="remarks"
-            value={form.remarks}
+            value={form.remarks || ""}
             onChange={onChange}
             fullWidth
             multiline
             rows={2}
+            disabled={!editMode}
           />
         </Box>
       </DialogContent>
 
       <DialogActions>
         <Button onClick={onClose} color="secondary">Cancel</Button>
-        <Button onClick={onSubmit} variant="contained">Save</Button>
+        {editMode && <Button onClick={onSubmit} variant="contained">Save</Button>}
       </DialogActions>
     </Dialog>
   );

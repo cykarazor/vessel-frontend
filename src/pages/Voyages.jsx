@@ -38,8 +38,8 @@ export default function Voyages({ user, onLogout }) {
   const [voyages, setVoyages] = useState([]);
   const [selectedVoyage, setSelectedVoyage] = useState(null);
   const [form, setForm] = useState(initialForm);
-  const [editMode, setEditMode] = useState(false);
-  const [viewMode, setViewMode] = useState(false);
+  const [editMode, setEditMode] = useState(false); // true if form modal is open
+  const [viewMode, setViewMode] = useState(false); // true if details modal is open
 
   useEffect(() => {
     fetchVoyages();
@@ -77,25 +77,26 @@ export default function Voyages({ user, onLogout }) {
   const handleAddVoyage = () => {
     setSelectedVoyage(null);
     setForm(initialForm);
-    setEditMode(true);
+    setEditMode(true); // 🚀 open form modal
   };
 
   const handleViewVoyage = (voyage) => {
     setSelectedVoyage(voyage);
     setForm(mapToForm(voyage));
-    setViewMode(true);
+    setViewMode(true); // 👁 open detail modal
   };
 
   const handleEditFromView = () => {
     setViewMode(false);
-    setEditMode(true);
+    setForm(mapToForm(selectedVoyage)); // 💾 load form with existing data
+    setEditMode(true); // 🛠 switch to edit mode
   };
 
   const handleCloseModals = () => {
     setEditMode(false);
     setViewMode(false);
     setSelectedVoyage(null);
-    setForm(initialForm);
+    setForm(initialForm); // 🧹 clear form
   };
 
   const handleChange = (e) => {
@@ -123,15 +124,19 @@ export default function Voyages({ user, onLogout }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const payload = {
       ...form,
       departureDate: form.departureDate ? dayjs(form.departureDate).toISOString() : null,
       arrivalDate: form.arrivalDate ? dayjs(form.arrivalDate).toISOString() : null,
     };
+
     try {
       if (selectedVoyage && selectedVoyage._id) {
+        // 📝 Editing
         await axios.put(`${API_BASE}/api/voyages/${selectedVoyage._id}`, payload);
       } else {
+        // ➕ Creating
         await axios.post(`${API_BASE}/api/voyages`, payload);
       }
       handleCloseModals();
@@ -161,6 +166,7 @@ export default function Voyages({ user, onLogout }) {
         <VoyageList voyages={voyages} onSelect={handleViewVoyage} />
       </Paper>
 
+      {/* 👁 Show details modal */}
       <VoyageDetails
         open={viewMode}
         selectedVoyage={selectedVoyage}
@@ -168,6 +174,7 @@ export default function Voyages({ user, onLogout }) {
         onEdit={handleEditFromView}
       />
 
+      {/* ✍️ Show form modal */}
       <VoyageForm
         open={editMode}
         editMode={!!selectedVoyage}
@@ -177,7 +184,6 @@ export default function Voyages({ user, onLogout }) {
         onChange={handleChange}
         onDateChange={handleDateChange}
         onSubmit={handleSubmit}
-        setEditMode={setEditMode}
       />
     </Box>
   );
